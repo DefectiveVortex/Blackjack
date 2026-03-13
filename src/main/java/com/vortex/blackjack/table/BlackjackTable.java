@@ -40,6 +40,7 @@ public class BlackjackTable {
     private final ChatUtils chatUtils;
     private final BlackjackEngine gameEngine;
     private final Location centerLoc;
+    private final TableSettings settings;
     
     // Game state
     private final List<Player> players = new ArrayList<>();
@@ -61,13 +62,20 @@ public class BlackjackTable {
     private final Map<Player, Long> gameEndTimes = new ConcurrentHashMap<>();
     private BukkitTask autoLeaveTask;
     
-    public BlackjackTable(BlackjackPlugin plugin, TableManager tableManager, ConfigManager configManager, Location centerLoc) {
+    public BlackjackTable(BlackjackPlugin plugin, TableManager tableManager,
+                          ConfigManager configManager, Location centerLoc,
+                          TableSettings settings) {
         this.plugin = plugin;
         this.tableManager = tableManager;
         this.configManager = configManager;
         this.chatUtils = new ChatUtils(configManager);
         this.gameEngine = new BlackjackEngine();
         this.centerLoc = centerLoc;
+        this.settings = settings;
+    }
+
+    public TableSettings getSettings() {
+        return settings;
     }
     
     /**
@@ -85,7 +93,7 @@ public class BlackjackTable {
                 return false;
             }
             
-            if (players.size() >= configManager.getMaxPlayers()) {
+            if (players.size() >= settings.getMaxPlayers(configManager)) {
                 player.sendMessage(configManager.getMessage("table-full"));
                 return false;
             }
@@ -95,7 +103,7 @@ public class BlackjackTable {
                 return false;
             }
             
-            if (player.getLocation().distance(centerLoc) > configManager.getMaxJoinDistance()) {
+            if (player.getLocation().distance(centerLoc) > settings.getMaxJoinDistance(configManager)) {
                 player.sendMessage(configManager.getMessage("too-far"));
                 return false;
             }

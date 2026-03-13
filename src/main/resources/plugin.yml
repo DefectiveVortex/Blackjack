@@ -13,7 +13,8 @@ commands:
     description: Main command for the Blackjack plugin
     usage: |
       &8[&6Blackjack&8] &rAvailable Commands:
-      &e/createtable &7- Create a new blackjack table
+      &e/createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Create a table
+      &e/settable <setting> <value> &7- Modify nearest table settings
       &e/removetable &7- Remove the nearest table
       &e/join &7- Join the nearest table
       &e/leave &7- Leave your current table
@@ -27,6 +28,11 @@ commands:
   createtable:
     description: Create a new blackjack table
     permission: blackjack.admin
+    usage: /createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>]
+  settable:
+    description: Modify settings on the nearest blackjack table
+    permission: blackjack.admin
+    usage: /settable <min-bet|max-bet|max-players|max-join-distance> <value>
   removetable:
     description: Remove the nearest blackjack table
     permission: blackjack.admin
