@@ -1,0 +1,439 @@
+# Instincts generated from https://github.com/DefectiveVortex/Blackjack
+# Generated: 2026-03-13T05:26:07.985Z
+# Version: 2.0
+
+---
+id: Blackjack-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Commit Length
+
+## Action
+
+Keep commit messages concise (under 50 characters)
+
+## Evidence
+
+- Average commit message length: 12 chars
+- Based on 17 commits
+
+---
+id: Blackjack-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: Blackjack-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Export Style
+
+## Action
+
+Prefer mixed exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: mixed
+
+---
+id: Blackjack-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: Blackjack-workflow-database-migration
+trigger: "when modifying the database schema or adding tables"
+confidence: 0.75
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Workflow Database Migration
+
+## Action
+
+Follow the database-migration workflow:
+1. Create migration file
+2. Update schema definitions
+3. Generate/update types
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~5x per month
+- Files: 
+
+---
+id: Blackjack-workflow-version-release
+trigger: "when doing version release"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Workflow Version Release
+
+## Action
+
+Follow the version-release workflow:
+1. Update version in pom.xml and dependency-reduced-pom.xml
+2. Update BlackjackPlugin.java with version changes
+3. Update plugin.yml with new version
+4. Update README.md with release notes
+5. Modify core table and utility classes
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: pom.xml, dependency-reduced-pom.xml, src/main/java/com/vortex/blackjack/BlackjackPlugin.java
+
+---
+id: Blackjack-workflow-config-management-update
+trigger: "when doing config management update"
+confidence: 0.7
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Workflow Config Management Update
+
+## Action
+
+Follow the config-management-update workflow:
+1. Update ConfigManager.java with new config logic
+2. Modify config.yml with new settings
+3. Update BlackjackPlugin.java to handle config changes
+4. Update BlackjackTable.java to use new config
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~4x per month
+- Files: src/main/java/com/vortex/blackjack/config/ConfigManager.java, src/main/resources/config.yml, src/main/java/com/vortex/blackjack/BlackjackPlugin.java
+
+---
+id: Blackjack-workflow-command-system-enhancement
+trigger: "when doing command system enhancement"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/DefectiveVortex/Blackjack
+---
+
+# Blackjack Workflow Command System Enhancement
+
+## Action
+
+Follow the command-system-enhancement workflow:
+1. Create or modify specific command class
+2. Update CommandManager.java with new command registration
+3. Update BlackjackPlugin.java with command integration
+4. Update plugin.yml with command definitions
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: src/main/java/com/vortex/blackjack/commands/CommandManager.java, src/main/java/com/vortex/blackjack/BlackjackPlugin.java, src/main/resources/plugin.yml
+
+---
+id: blackjack-java-class-naming
+trigger: "When creating a new Java class file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Java Class Naming
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- BlackjackPlugin.java
+- BlackjackTable.java
+- CommandManager.java
+- ConfigManager.java
+
+---
+id: blackjack-java-method-naming
+trigger: "When creating Java methods"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Java Method Naming
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Pattern observed in BlackjackPlugin.java
+- Standard Java convention in codebase
+
+---
+id: blackjack-constants-naming
+trigger: "When defining Java constants"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Constants Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE naming convention
+
+## Evidence
+
+- Java naming conventions detected in codebase
+
+---
+id: blackjack-freeform-commits
+trigger: "When making a commit"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Freeform Commits
+
+## Action
+
+Write descriptive commit message without prefix conventions
+
+## Evidence
+
+- Add per-table settings for server administrators
+- Update README.md
+- Delete MIGRATION_EXAMPLE.md
+
+---
+id: blackjack-version-release-pom
+trigger: "When starting a version release"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Version Release Pom
+
+## Action
+
+Update version in both pom.xml and dependency-reduced-pom.xml first
+
+## Evidence
+
+- Version release workflow pattern
+- Both files consistently updated together
+
+---
+id: blackjack-version-release-plugin-yml
+trigger: "When updating version numbers"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Version Release Plugin Yml
+
+## Action
+
+Update plugin.yml with new version after pom files
+
+## Evidence
+
+- Version release workflow shows plugin.yml updated after pom changes
+
+---
+id: blackjack-config-manager-first
+trigger: "When updating configuration system"
+confidence: 0.88
+domain: workflow
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Config Manager First
+
+## Action
+
+Modify ConfigManager.java before updating config.yml
+
+## Evidence
+
+- Config management workflow shows ConfigManager updated first
+
+---
+id: blackjack-config-cascade-update
+trigger: "When changing ConfigManager.java"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Config Cascade Update
+
+## Action
+
+Update BlackjackPlugin.java and BlackjackTable.java to handle config changes
+
+## Evidence
+
+- Config workflow shows cascade updates to dependent classes
+
+---
+id: blackjack-command-registration-pattern
+trigger: "When adding new commands"
+confidence: 0.82
+domain: workflow
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Command Registration Pattern
+
+## Action
+
+Update CommandManager.java with new command registration after creating command class
+
+## Evidence
+
+- Command system workflow shows registration after command creation
+
+---
+id: blackjack-plugin-yml-command-def
+trigger: "When adding commands to CommandManager"
+confidence: 0.8
+domain: workflow
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Plugin Yml Command Def
+
+## Action
+
+Update plugin.yml with command definitions
+
+## Evidence
+
+- Command workflow shows plugin.yml updated with command definitions
+
+---
+id: blackjack-main-plugin-integration
+trigger: "When making system-level changes"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Main Plugin Integration
+
+## Action
+
+Update BlackjackPlugin.java to integrate changes
+
+## Evidence
+
+- BlackjackPlugin.java appears in all major workflows as integration point
+
+---
+id: blackjack-single-package-structure
+trigger: "When organizing Java source files"
+confidence: 0.9
+domain: architecture
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Single Package Structure
+
+## Action
+
+Place source files under src/main structure
+
+## Evidence
+
+- Single-package structure with src/main layout
+- All Java files in src/main/java path
+
+---
+id: blackjack-separate-test-location
+trigger: "When writing tests"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: DefectiveVortex/Blackjack
+---
+
+# Blackjack Separate Test Location
+
+## Action
+
+Place tests in separate test directory structure
+
+## Evidence
+
+- Architecture shows separate test location
+
