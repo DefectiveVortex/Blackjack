@@ -34,8 +34,9 @@ public class CommandManager {
         registerCommand("stats", new StatsCommand(plugin));
         
         // Admin commands
-        registerCommand("createtable", new SimpleForwardCommand(plugin, "createtable"));
+        registerCommand("createtable", new CreateTableCommand(plugin));
         registerCommand("removetable", new SimpleForwardCommand(plugin, "removetable"));
+        registerCommand("settable", new SettableCommand(plugin));
         registerCommand("bjversion", new VersionCommand(plugin, plugin.getVersionChecker()));
     }
     

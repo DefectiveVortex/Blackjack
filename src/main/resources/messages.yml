@@ -10,10 +10,17 @@ player-only-command: "&cThis command can only be used by players!"
 
 # Table management
 table-created: "&aBlackjack table created!"
+table-created-with-settings: "&aTable created! &7(min: &e%min_bet%&7, max: &e%max_bet%&7, players: &e%max_players%&7, distance: &e%max_join_distance%&7)"
+createtable-invalid-arg: "&cInvalid argument: %error%"
 table-removed: "&cBlackjack table removed!"
 table-already-exists: "&cTable already exists at this location!"
 table-remove-failed: "&cFailed to remove table!"
 no-table-nearby: "&cNo table found nearby!"
+settable-usage: "&eUsage: /bj settable <setting> <value>"
+settable-unknown-setting: "&cUnknown setting '%setting%'. Valid: min-bet, max-bet, max-players, max-join-distance"
+settable-invalid-value: "&cInvalid value: '%value%'"
+settable-validation-error: "&cValidation failed: %error%"
+settable-updated: "&aSetting &e%setting% &aset to &e%value% &aon nearest table."
 
 # Player table status
 already-at-table: "&cYou are already at a table! Use /leave to leave your current table."
@@ -105,7 +112,8 @@ config-reloaded: "&aConfiguration reloaded!"
 
 # Help command
 help-header: "&rAvailable Commands:"
-help-admin-create: "&e/bj createtable &7- Create a new blackjack table"
+help-admin-create: "&e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Create a table"
+help-admin-settable: "&e/bj settable <setting> <value> &7- Modify nearest table settings"
 help-admin-remove: "&e/bj removetable &7- Remove the nearest table"
 help-admin-reload: "&e/bj reload &7- Reload configuration"
 help-join: "&e/join &7- Join the nearest table"

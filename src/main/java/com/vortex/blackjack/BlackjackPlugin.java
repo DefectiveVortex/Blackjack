@@ -8,6 +8,7 @@ import com.vortex.blackjack.integration.BlackjackPlaceholderExpansion;
 import com.vortex.blackjack.model.PlayerStats;
 import com.vortex.blackjack.table.BlackjackTable;
 import com.vortex.blackjack.table.TableManager;
+import com.vortex.blackjack.table.TableSettings;
 import com.vortex.blackjack.util.AsyncUtils;
 import com.vortex.blackjack.util.GenericUtils;
 import com.vortex.blackjack.util.VersionChecker;
@@ -186,10 +187,17 @@ public class BlackjackPlugin extends JavaPlugin implements Listener {
             
             // Table management
             messagesConfig.set("table-created", "&aBlackjack table created!");
+            messagesConfig.set("table-created-with-settings", "&aTable created! &7(min: &e%min_bet%&7, max: &e%max_bet%&7, players: &e%max_players%&7, distance: &e%max_join_distance%&7)");
+            messagesConfig.set("createtable-invalid-arg", "&cInvalid argument: %error%");
             messagesConfig.set("table-removed", "&cBlackjack table removed!");
             messagesConfig.set("table-already-exists", "&cTable already exists at this location!");
             messagesConfig.set("table-remove-failed", "&cFailed to remove table!");
             messagesConfig.set("no-table-nearby", "&cNo table found nearby!");
+            messagesConfig.set("settable-usage", "&eUsage: /bj settable <setting> <value>");
+            messagesConfig.set("settable-unknown-setting", "&cUnknown setting '%setting%'. Valid: min-bet, max-bet, max-players, max-join-distance");
+            messagesConfig.set("settable-invalid-value", "&cInvalid value: '%value%'");
+            messagesConfig.set("settable-validation-error", "&cValidation failed: %error%");
+            messagesConfig.set("settable-updated", "&aSetting &e%setting% &aset to &e%value% &aon nearest table.");
             
             // Player table status
             messagesConfig.set("already-at-table", "&cYou are already at a table! Use /leave to leave your current table.");
@@ -276,7 +284,8 @@ public class BlackjackPlugin extends JavaPlugin implements Listener {
             
             // Help command
             messagesConfig.set("help-header", "&rAvailable Commands:");
-            messagesConfig.set("help-admin-create", "&e/bj createtable &7- Create a new blackjack table");
+            messagesConfig.set("help-admin-create", "&e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Create a table");
+            messagesConfig.set("help-admin-settable", "&e/bj settable <setting> <value> &7- Modify nearest table settings");
             messagesConfig.set("help-admin-remove", "&e/bj removetable &7- Remove the nearest table");
             messagesConfig.set("help-admin-reload", "&e/bj reload &7- Reload configuration");
             messagesConfig.set("help-join", "&e/join &7- Join the nearest table");
@@ -405,7 +414,7 @@ public class BlackjackPlugin extends JavaPlugin implements Listener {
             BlackjackTable table = tableManager.getPlayerTable(player);
             if (table != null) {
                 double distance = player.getLocation().distance(table.getCenterLocation());
-                double maxDistance = configManager.getMaxJoinDistance();
+                double maxDistance = table.getSettings().getMaxJoinDistance(configManager);
                 
                 if (distance > maxDistance) {
                     // Player moved too far from table, auto-leave
@@ -433,7 +442,8 @@ public class BlackjackPlugin extends JavaPlugin implements Listener {
         String action = args[0].toLowerCase();
         
         return switch (action) {
-            case "createtable" -> handleCreateTable(player);
+            case "createtable" -> handleCreateTable(player, args);
+            case "settable" -> handleSetTable(player, args);
             case "removetable" -> handleRemoveTable(player);
             case "join" -> handleJoin(player);
             case "leave" -> handleLeave(player);
@@ -453,18 +463,90 @@ public class BlackjackPlugin extends JavaPlugin implements Listener {
     
     // Command handlers - clean and focused methods
     
-    private boolean handleCreateTable(Player player) {
+    private boolean handleCreateTable(Player player, String[] args) {
         if (!player.hasPermission("blackjack.admin")) {
             player.sendMessage(configManager.getMessage("no-permission"));
             return true;
         }
-        
-        if (tableManager.createTable(player.getLocation())) {
-            player.sendMessage(configManager.getMessage("table-created"));
+
+        StringBuilder err = new StringBuilder();
+        TableSettings settings = TableSettings.parseArgs(args, 1, configManager, err);
+        if (settings == null) {
+            player.sendMessage(configManager.formatMessage("createtable-invalid-arg", "error", err.toString()));
+            return true;
+        }
+
+        if (tableManager.createTable(player.getLocation(), settings)) {
+            player.sendMessage(configManager.formatMessage("table-created-with-settings",
+                "min_bet",          settings.getMinBet(configManager),
+                "max_bet",          settings.getMaxBet(configManager),
+                "max_players",      settings.getMaxPlayers(configManager),
+                "max_join_distance", settings.getMaxJoinDistance(configManager)));
         } else {
             player.sendMessage(configManager.getMessage("table-already-exists"));
         }
         return true;
+    }
+
+    private boolean handleSetTable(Player player, String[] args) {
+        if (!player.hasPermission("blackjack.admin")) {
+            player.sendMessage(configManager.getMessage("no-permission"));
+            return true;
+        }
+
+        // /bj settable <setting> <value>
+        if (args.length < 3) {
+            player.sendMessage(configManager.getMessage("settable-usage"));
+            return true;
+        }
+
+        BlackjackTable table = tableManager.findNearestTable(player.getLocation());
+        if (table == null) {
+            player.sendMessage(configManager.getMessage("no-table-nearby"));
+            return true;
+        }
+
+        String setting = args[1].toLowerCase();
+        String value   = args[2];
+        TableSettings s = table.getSettings();
+
+        try {
+            switch (setting) {
+                case "min-bet"            -> s.setMinBet(parsePositiveInt(value));
+                case "max-bet"            -> s.setMaxBet(parsePositiveInt(value));
+                case "max-players"        -> s.setMaxPlayers(Math.max(1, Math.min(8, parsePositiveInt(value))));
+                case "max-join-distance"  -> s.setMaxJoinDistance(parsePositiveDouble(value));
+                default -> {
+                    player.sendMessage(configManager.formatMessage("settable-unknown-setting", "setting", setting));
+                    return true;
+                }
+            }
+        } catch (NumberFormatException e) {
+            player.sendMessage(configManager.formatMessage("settable-invalid-value", "value", value));
+            return true;
+        }
+
+        String err = s.validate(configManager);
+        if (err != null) {
+            player.sendMessage(configManager.formatMessage("settable-validation-error", "error", err));
+            return true;
+        }
+
+        tableManager.saveTableSettings(table);
+        player.sendMessage(configManager.formatMessage("settable-updated", "setting", setting, "value", value));
+        return true;
+    }
+
+    private int parsePositiveInt(String s) {
+        int v = Integer.parseInt(s);
+        if (v <= 0) throw new NumberFormatException("must be positive");
+        return v;
+    }
+
+    private double parsePositiveDouble(String s) {
+        double v = Double.parseDouble(s);
+        if (v <= 0) throw new NumberFormatException("must be positive");
+        return v;
     }
     
     private boolean handleRemoveTable(Player player) {
@@ -653,10 +735,17 @@ public class BlackjackPlugin extends JavaPlugin implements Listener {
     // Betting system - improved and thread-safe
     
     private boolean processBet(Player player, int amount) {
+        // Resolve per-table bet limits (fall back to global config if not at a table)
+        BlackjackTable playerTable = tableManager.getPlayerTable(player);
+        int effectiveMin = playerTable != null
+                ? playerTable.getSettings().getMinBet(configManager) : configManager.getMinBet();
+        int effectiveMax = playerTable != null
+                ? playerTable.getSettings().getMaxBet(configManager) : configManager.getMaxBet();
+
         // Validate bet amount
-        if (amount < configManager.getMinBet() || amount > configManager.getMaxBet()) {
-            player.sendMessage(configManager.formatMessage("invalid-bet", 
-                "min_bet", configManager.getMinBet(), "max_bet", configManager.getMaxBet()));
+        if (amount < effectiveMin || amount > effectiveMax) {
+            player.sendMessage(configManager.formatMessage("invalid-bet",
+                "min_bet", effectiveMin, "max_bet", effectiveMax));
             return true;
         }
         
@@ -764,6 +853,7 @@ public class BlackjackPlugin extends JavaPlugin implements Listener {
         
         if (player.hasPermission("blackjack.admin")) {
             player.sendMessage(configManager.getMessage("help-admin-create"));
+            player.sendMessage(configManager.getMessage("help-admin-settable"));
             player.sendMessage(configManager.getMessage("help-admin-remove"));
             player.sendMessage(configManager.getMessage("help-admin-reload"));
         }
