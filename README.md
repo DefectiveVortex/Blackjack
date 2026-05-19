@@ -36,36 +36,37 @@
 
 ### Installation
 1. **Download** the latest `Blackjack.jar` from releases
-2. **Place** the jar in your server's `plugins` folder
-3. **Install** the required `@playing_cards` resource pack
-4. **Restart** your server
-5. **Configure** settings in `config.yml` (optional)
+2. **Install Vault** and a **Vault-compatible economy plugin** before starting the server
+3. **Place** the jar in your server's `plugins` folder
+4. **Install** the required `@playing_cards` resource pack
+5. **Restart** your server
+6. **Configure** settings in `config.yml` (optional)
 
 ### Basic Usage
 ```bash
 # Create a table (Admin)
-/createtable
+/bj createtable
 
 # Join and play
-/join          # Join nearest table
-/bet 100       # Place your bet
-/start         # Start the game
-/hit           # Take another card
-/stand         # End your turn
-/stats         # View your statistics
+/bj join          # Join nearest table
+/bj bet 100       # Place your bet
+/bj start         # Start the game
+/bj hit           # Take another card
+/bj stand         # End your turn
+/bj stats         # View your statistics
 ```
 
 ## 🎯 Commands & Permissions
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/createtable` | Create a new blackjack table | `blackjack.admin` |
-| `/removetable` | Remove the nearest table | `blackjack.admin` |
-| `/join` | Join the nearest table | `blackjack.play` |
-| `/leave` | Leave your current table | `blackjack.play` |
-| `/bet <amount>` | Place or change your bet | `blackjack.play` |
-| `/hit` / `/stand` | Game actions | `blackjack.play` |
-| `/stats [player]` | View statistics | `blackjack.play` |
+| `/bj createtable` | Create a new blackjack table | `blackjack.admin` |
+| `/bj removetable` | Remove the nearest table | `blackjack.admin` |
+| `/bj join` | Join the nearest table | `blackjack.play` |
+| `/bj leave` | Leave your current table | `blackjack.play` |
+| `/bj bet <amount>` | Place or change your bet | `blackjack.play` |
+| `/bj hit` / `/bj stand` | Game actions | `blackjack.play` |
+| `/bj stats [player]` | View statistics | `blackjack.play` |
 
 ## 🔌 PlaceholderAPI Integration
 

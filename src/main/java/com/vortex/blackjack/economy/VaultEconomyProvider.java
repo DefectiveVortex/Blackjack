@@ -45,10 +45,15 @@ public class VaultEconomyProvider implements EconomyProvider {
     public boolean isEnabled() {
         return enabled;
     }
+
+    @Override
+    public boolean isAvailable() {
+        return enabled && economy != null;
+    }
     
     @Override
     public boolean hasEnough(UUID playerUuid, BigDecimal amount) {
-        if (!enabled) return false;
+        if (!isAvailable()) return false;
         try {
             OfflinePlayer player = Bukkit.getOfflinePlayer(playerUuid);
             return economy.has(player, amount.doubleValue());
@@ -59,7 +64,7 @@ public class VaultEconomyProvider implements EconomyProvider {
     
     @Override
     public boolean add(UUID playerUuid, BigDecimal amount) {
-        if (!enabled) return false;
+        if (!isAvailable()) return false;
         try {
             OfflinePlayer player = Bukkit.getOfflinePlayer(playerUuid);
             return economy.depositPlayer(player, amount.doubleValue()).transactionSuccess();
@@ -70,7 +75,7 @@ public class VaultEconomyProvider implements EconomyProvider {
     
     @Override
     public boolean subtract(UUID playerUuid, BigDecimal amount) {
-        if (!enabled) return false;
+        if (!isAvailable()) return false;
         try {
             OfflinePlayer player = Bukkit.getOfflinePlayer(playerUuid);
             return economy.withdrawPlayer(player, amount.doubleValue()).transactionSuccess();
@@ -81,7 +86,7 @@ public class VaultEconomyProvider implements EconomyProvider {
     
     @Override
     public BigDecimal getBalance(UUID playerUuid) {
-        if (!enabled) return BigDecimal.ZERO;
+        if (!isAvailable()) return BigDecimal.ZERO;
         try {
             OfflinePlayer player = Bukkit.getOfflinePlayer(playerUuid);
             return BigDecimal.valueOf(economy.getBalance(player));

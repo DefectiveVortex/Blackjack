@@ -108,7 +108,7 @@ public class VersionChecker {
                 admin.sendMessage("§e║ §fLatest Version:  §a" + latestVersion + "§e                                                  ║");
                 admin.sendMessage("§e║                                                                           ║");
                 admin.sendMessage("§e║ §bDownload: §9" + downloadUrl + "§e     ║");
-                admin.sendMessage("§e║ §7Use §f/bjversion§7 for more details§e                                    ║");
+                admin.sendMessage("§e║ §7Use §f/bj version§7 for more details§e                                  ║");
                 admin.sendMessage("§e╚═══════════════════════════════════════════════════════════════════════════╝");
             }, 40L); // Delay 2 seconds after join
         }

@@ -102,7 +102,7 @@ public class GenericUtils {
             
             int amount = amounts.get(i);
             String buttonText = configManager.getBetColorByAmount(amount) + "$" + amount;
-            String command = "/bet " + amount;
+            String command = "/bj bet " + amount;
             String hoverText = "§eClick to bet $" + amount;
             
             TextComponent button = createClickableButton(buttonText, command, hoverText);

@@ -23,8 +23,8 @@ settable-validation-error: "&cValidation failed: %error%"
 settable-updated: "&aSetting &e%setting% &aset to &e%value% &aon nearest table."
 
 # Player table status
-already-at-table: "&cYou are already at a table! Use /leave to leave your current table."
-not-at-table: "&cYou're not at a table! Use /join near a table to play."
+already-at-table: "&cYou are already at a table! Use /bj leave to leave your current table."
+not-at-table: "&cYou're not at a table! Use /bj join near a table to play."
 auto-left-table: "&eYou moved too far from the table and were automatically removed."
 auto-left-inactive: "&eYou were automatically removed due to inactivity so others can play."
 left-table: "&aYou left the table."
@@ -39,18 +39,19 @@ join-error: "&cError joining table. Please try again."
 game-in-progress: "&cCannot perform this action during an active game!"
 
 # Betting
-bet-required: "&cYou must place a bet before the game can start! Use /bet <amount>"
+bet-required: "&cYou must place a bet before the game can start! Use /bj bet <amount>"
 invalid-bet: "&cInvalid bet amount! Must be between %min_bet% and %max_bet%."
 insufficient-funds: "&cYou don't have enough money to bet $%amount%!"
 bet-cooldown: "&cPlease wait a moment before changing your bet again."
 bet-set: "&aYour bet has been set to $%amount%!"
 bet-already-set: "&eYour bet is already $%amount%!"
+betting-locked: "&cBetting is closed while the current round is being played or settled."
 bet-refunded: "&aYour bet of $%amount% has been refunded."
 bet-refunded-shutdown: "&aBet refunded due to server shutdown: $%amount%"
 bet-reduced-refunded: "&aBet reduced to $%amount% and refunded $%refund%!"
 auto-bet-placed: "&aAuto-bet placed: $%amount%"
 invalid-amount: "&cInvalid amount!"
-bet-usage: "&cUsage: /bet <amount>"
+bet-usage: "&cUsage: /bj bet <amount>"
 bet-failed: "&cFailed to process bet!"
 bet-refund-failed: "&cFailed to process bet refund!"
 error-refund: "&cAn error occurred while refunding your bet. Contact a staff member!"
@@ -116,12 +117,13 @@ help-admin-create: "&e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<
 help-admin-settable: "&e/bj settable <setting> <value> &7- Modify nearest table settings"
 help-admin-remove: "&e/bj removetable &7- Remove the nearest table"
 help-admin-reload: "&e/bj reload &7- Reload configuration"
-help-join: "&e/join &7- Join the nearest table"
-help-leave: "&e/leave &7- Leave your current table"
-help-bet: "&e/bet <amount> &7- Place or change your bet"
-help-start: "&e/start &7- Start a new game"
-help-hit: "&e/hit &7- Take another card"
-help-stand: "&e/stand &7- End your turn"
+help-admin-version: "&e/bj version &7- Check plugin version and update status"
+help-join: "&e/bj join &7- Join the nearest table"
+help-leave: "&e/bj leave &7- Leave your current table"
+help-bet: "&e/bj bet <amount> &7- Place or change your bet"
+help-start: "&e/bj start &7- Start a new game"
+help-hit: "&e/bj hit &7- Take another card"
+help-stand: "&e/bj stand &7- End your turn"
 help-stats: "&e/bj stats &7- View your statistics"
 help-stats-others: "&e/bj stats <player> &7- View another player's statistics"
 
@@ -156,34 +158,34 @@ buttons:
   # Game action buttons
   hit:
     text: "&a&l[HIT]"
-    command: "/hit"
+    command: "/bj hit"
     hover: "&eClick to take another card"
   
   stand:
     text: "&c&l[STAND]"
-    command: "/stand"
+    command: "/bj stand"
     hover: "&eClick to end your turn"
   
   double-down:
     text: "&6&l[DOUBLE DOWN]"
-    command: "/doubledown"
+    command: "/bj doubledown"
     hover: "&eClick to double your bet and take one card"
   
   # Post-game buttons
   play-again:
     text: "&a&l[Play Again]"
-    command: "/start"
+    command: "/bj start"
     hover: "&eClick to start a new game"
   
   leave-table:
     text: "&c&l[Leave Table]"
-    command: "/leave"
+    command: "/bj leave"
     hover: "&eClick to leave the table"
   
   # Betting buttons
   custom-bet:
     text: "&b&l[CUSTOM BET]"
-    command: "/bet "
+    command: "/bj bet "
     hover: "&eClick to enter custom amount"
   
   # Bet amount colors

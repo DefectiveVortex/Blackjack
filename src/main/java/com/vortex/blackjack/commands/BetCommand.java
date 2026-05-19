@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 /**
- * Handle the /bet command with smart amount suggestions and configurable chat betting
+ * Handle blackjack bet forwarding with smart amount suggestions and configurable chat betting.
  */
 public class BetCommand extends BlackjackCommand {
     private final BlackjackPlugin plugin;

@@ -7,6 +7,10 @@ import java.util.UUID;
  * Interface for economy operations to allow different economy plugin support
  */
 public interface EconomyProvider {
+    /**
+     * Whether the provider is ready to service economy requests.
+     */
+    boolean isAvailable();
     
     /**
      * Check if a player has enough money

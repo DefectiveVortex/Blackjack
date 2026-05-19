@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Handles /createtable with tab completion for per-table settings.
+ * Handles blackjack table creation forwarding with per-table setting suggestions.
  */
 public class CreateTableCommand extends BlackjackCommand {
 

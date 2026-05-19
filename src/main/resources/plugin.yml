@@ -1,5 +1,5 @@
 name: Blackjack
-version: 2.3
+version: 2.4
 main: com.vortex.blackjack.BlackjackPlugin
 description: A physical blackjack table game for Minecraft
 api-version: 1.21
@@ -13,63 +13,23 @@ commands:
     description: Main command for the Blackjack plugin
     usage: |
       &8[&6Blackjack&8] &rAvailable Commands:
-      &e/createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Create a table
-      &e/settable <setting> <value> &7- Modify nearest table settings
-      &e/removetable &7- Remove the nearest table
-      &e/join &7- Join the nearest table
-      &e/leave &7- Leave your current table
-      &e/start &7- Start a new game
-      &e/hit &7- Take another card
-      &e/stand &7- End your turn
-      &e/doubledown &7- Double your bet and take exactly one more card
-      &e/bet <amount> &7- Place or change your bet
-      &e/stats [player] &7- View statistics (admins can check other players)
+      &e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Create a table
+      &e/bj settable <setting> <value> &7- Modify nearest table settings
+      &e/bj removetable &7- Remove the nearest table
+      &e/bj join &7- Join the nearest table
+      &e/bj leave &7- Leave your current table
+      &e/bj start &7- Start a new game
+      &e/bj hit &7- Take another card
+      &e/bj stand &7- End your turn
+      &e/bj doubledown &7- Double your bet and take exactly one more card
+      &e/bj bet <amount> &7- Place or change your bet
+      &e/bj stats [player] &7- View statistics (admins can check other players)
+      &e/bj version &7- Check the plugin version and update status
     aliases: [bj]
-  createtable:
-    description: Create a new blackjack table
-    permission: blackjack.admin
-    usage: /createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>]
-  settable:
-    description: Modify settings on the nearest blackjack table
-    permission: blackjack.admin
-    usage: /settable <min-bet|max-bet|max-players|max-join-distance> <value>
-  removetable:
-    description: Remove the nearest blackjack table
-    permission: blackjack.admin
-  join:
-    description: Join the nearest blackjack table
-    permission: blackjack.play
-  leave:
-    description: Leave your current blackjack table
-    permission: blackjack.play
-  start:
-    description: Start a new blackjack game
-    permission: blackjack.play
-  hit:
-    description: Take another card in blackjack
-    permission: blackjack.play
-  stand:
-    description: End your turn in blackjack
-    permission: blackjack.play
-  doubledown:
-    description: Double your bet and take exactly one more card
-    permission: blackjack.play
-    aliases: [dd]
-  bet:
-    description: Place or change your bet in blackjack
-    permission: blackjack.play
-    usage: /bet <amount>
-  stats:
-    description: View your blackjack statistics or check another player's stats (admin only)
-    permission: blackjack.play
-    usage: /stats [player]
-  bjversion:
-    description: Check the plugin version and update status
-    permission: blackjack.admin
 
 permissions:
   blackjack.admin:
-    description: Allows creation and removal of blackjack tables
+    description: Allows creation, removal, and configuration of blackjack tables
     default: op
   blackjack.play:
     description: Allows playing blackjack

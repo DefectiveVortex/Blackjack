@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -49,9 +50,11 @@ public class BlackjackTable {
     private final Set<Player> finishedPlayers = ConcurrentHashMap.newKeySet();
     private final Set<Player> doubleDownPlayers = ConcurrentHashMap.newKeySet();
     private boolean gameInProgress = false;
+    private boolean settlingResults = false;
     private Player currentPlayer;
     private List<Card> dealerHand = new ArrayList<>();
     private Deck deck = new Deck();
+    private final Map<Player, Integer> roundBets = new ConcurrentHashMap<>();
     
     // Display entities
     private final Map<Player, List<ItemDisplay>> playerCardDisplays = new ConcurrentHashMap<>();
@@ -72,6 +75,7 @@ public class BlackjackTable {
         this.gameEngine = new BlackjackEngine();
         this.centerLoc = centerLoc;
         this.settings = settings;
+        purgeTrackedDisplays();
     }
 
     public TableSettings getSettings() {
@@ -100,6 +104,11 @@ public class BlackjackTable {
             
             if (gameInProgress) {
                 player.sendMessage(configManager.getMessage("game-in-progress"));
+                return false;
+            }
+
+            if (settlingResults) {
+                player.sendMessage(configManager.getMessage("betting-locked"));
                 return false;
             }
             
@@ -216,18 +225,14 @@ public class BlackjackTable {
             List<ItemDisplay> cardDisplays = playerCardDisplays.remove(player);
             if (cardDisplays != null) {
                 cardDisplays.forEach(display -> {
-                    if (display != null && !display.isDead()) {
-                        display.remove();
-                    }
+                    removeTrackedDisplay(display);
                 });
             }
             
             List<ItemDisplay> dealerDisplays = playerDealerDisplays.remove(player);
             if (dealerDisplays != null) {
                 dealerDisplays.forEach(display -> {
-                    if (display != null && !display.isDead()) {
-                        display.remove();
-                    }
+                    removeTrackedDisplay(display);
                 });
             }
             
@@ -291,10 +296,12 @@ public class BlackjackTable {
             
             // Initialize game
             gameInProgress = true;
+            settlingResults = false;
             deck = new Deck();
             clearAllDisplays();
             finishedPlayers.clear();
             doubleDownPlayers.clear();
+            roundBets.clear();
             
             // Deal initial cards (2 per player)
             for (Player player : players) {
@@ -302,6 +309,7 @@ public class BlackjackTable {
                 hand.add(deck.drawCard());
                 hand.add(deck.drawCard());
                 playerHands.put(player, hand);
+                roundBets.put(player, plugin.getPlayerBets().getOrDefault(player, 0));
                 updateCardDisplays(player, hand);
             }
             
@@ -489,6 +497,7 @@ public class BlackjackTable {
             
             // Set game as finished BEFORE showing final dealer cards
             gameInProgress = false;
+            settlingResults = true;
             
             // Update dealer displays and show final hand with cards and value
             updateDealerDisplays();
@@ -509,6 +518,8 @@ public class BlackjackTable {
                 
                 // Reset game state immediately after payouts so new games can start
                 resetGameState();
+                settlingResults = false;
+                roundBets.clear();
                 
                 // Show game ended message and buttons after payouts
                 if (!players.isEmpty()) {
@@ -534,7 +545,7 @@ public class BlackjackTable {
         BlackjackEngine.GameResult result = gameEngine.determineResult(playerHand, dealerHand);
         
         // Get the player's bet amount
-        Integer betAmount = plugin.getPlayerBets().get(player);
+        Integer betAmount = roundBets.get(player);
         if (betAmount == null) {
             betAmount = 0;
         }
@@ -692,7 +703,7 @@ public class BlackjackTable {
         ItemDisplay display = (ItemDisplay)world.spawn(displayLoc, ItemDisplay.class);
         
         if (card != null) {
-            String cardIdentifier = getCardIdentifier(card);
+            String cardIdentifier = card.getCardIdentifier();
             ItemStack cardItem = new ItemStack(Material.CLOCK);
             ItemMeta meta = cardItem.getItemMeta();
             meta.setItemModel(new NamespacedKey("playing_cards", "card/" + cardIdentifier.toLowerCase()));
@@ -706,6 +717,8 @@ public class BlackjackTable {
             display.setItemStack(cardBack);
         }
 
+        display.addScoreboardTag("blackjack-card");
+        display.addScoreboardTag(getTableDisplayTag());
         Transformation transform = createCardTransformation(isDealer, seatNumber);
         display.setTransformation(transform);
         return display;
@@ -837,6 +850,29 @@ public class BlackjackTable {
                 player.getLocation().add(0.0, 2.0, 0.0), 10, 0.5, 0.5, 0.5);
         }
     }
+
+    private String getTableDisplayTag() {
+        return "blackjack-table:" + centerLoc.getWorld().getName() + ":" + centerLoc.getBlockX() + ":" + centerLoc.getBlockY() + ":" + centerLoc.getBlockZ();
+    }
+
+    private void removeTrackedDisplay(ItemDisplay display) {
+        if (display != null && !display.isDead()) {
+            display.remove();
+        }
+    }
+
+    private void purgeTrackedDisplays() {
+        if (centerLoc.getWorld() == null) {
+            return;
+        }
+
+        String tableTag = getTableDisplayTag();
+        for (Entity entity : centerLoc.getWorld().getNearbyEntities(centerLoc, 8.0, 4.0, 8.0, entity ->
+            entity.getScoreboardTags().contains("blackjack-card") &&
+            entity.getScoreboardTags().contains(tableTag))) {
+            entity.remove();
+        }
+    }
     
     // Display management methods - ORIGINAL IMPLEMENTATION
     private void updateCardDisplays(Player player, List<Card> hand) {
@@ -845,7 +881,7 @@ public class BlackjackTable {
         
         if (playerCardDisplays.containsKey(player)) {
             for (ItemDisplay display : playerCardDisplays.get(player)) {
-                display.remove();
+                removeTrackedDisplay(display);
             }
             playerCardDisplays.get(player).clear();
         }
@@ -901,7 +937,7 @@ public class BlackjackTable {
         for (Player player : players) {
             if (playerDealerDisplays.containsKey(player)) {
                 for (ItemDisplay display : playerDealerDisplays.get(player)) {
-                    display.remove();
+                    removeTrackedDisplay(display);
                 }
                 playerDealerDisplays.get(player).clear();
             }
@@ -965,13 +1001,13 @@ public class BlackjackTable {
     }
     
     private void clearAllDisplays() {
+        purgeTrackedDisplays();
+
         // Clear displays for all players (not just current players list)
         for (List<ItemDisplay> cardDisplays : playerCardDisplays.values()) {
             if (cardDisplays != null) {
                 cardDisplays.forEach(display -> {
-                    if (display != null && !display.isDead()) {
-                        display.remove();
-                    }
+                    removeTrackedDisplay(display);
                 });
             }
         }
@@ -979,9 +1015,7 @@ public class BlackjackTable {
         for (List<ItemDisplay> dealerDisplays : playerDealerDisplays.values()) {
             if (dealerDisplays != null) {
                 dealerDisplays.forEach(display -> {
-                    if (display != null && !display.isDead()) {
-                        display.remove();
-                    }
+                    removeTrackedDisplay(display);
                 });
             }
         }
@@ -994,6 +1028,7 @@ public class BlackjackTable {
      * Cleanup all resources for this table
      */
     public void cleanup() {
+        purgeTrackedDisplays();
         clearAllDisplays();
         players.clear();
         playerHands.clear();
@@ -1003,12 +1038,15 @@ public class BlackjackTable {
         playerCardDisplays.clear();
         playerDealerDisplays.clear();
         lastMessageTime.clear();
+        roundBets.clear();
+        settlingResults = false;
     }
     
     // Getters
     public Location getCenterLocation() { return centerLoc; }
     public List<Player> getPlayers() { return new ArrayList<>(players); }
     public boolean isGameInProgress() { return gameInProgress; }
+    public boolean isBettingLocked() { return gameInProgress || settlingResults; }
     
     // PlaceholderAPI support methods
     public int getPlayerCount() { return players.size(); }
@@ -1061,7 +1099,7 @@ public class BlackjackTable {
     }
 
     public boolean canStartGame() {
-        if (gameInProgress || players.isEmpty()) {
+        if (gameInProgress || settlingResults || players.isEmpty()) {
             return false;
         }
         

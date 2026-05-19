@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Handle the /stats command with admin support for checking other players' stats
+ * Handle blackjack stats forwarding with admin support for checking other players' stats.
  */
 public class StatsCommand extends BlackjackCommand {
     private final BlackjackPlugin plugin;

@@ -251,7 +251,52 @@ public class ConfigManager {
     }
     
     public String getButtonCommand(String buttonName) {
-        return messagesConfig.getString("buttons." + buttonName + ".command", "/" + buttonName);
+        String command = messagesConfig.getString("buttons." + buttonName + ".command", getDefaultButtonCommand(buttonName));
+        return normalizeBlackjackCommand(command);
+    }
+
+    private String getDefaultButtonCommand(String buttonName) {
+        return switch (buttonName) {
+            case "double-down" -> "/bj doubledown";
+            case "play-again" -> "/bj start";
+            case "leave-table" -> "/bj leave";
+            case "custom-bet" -> "/bj bet ";
+            default -> "/bj " + buttonName;
+        };
+    }
+
+    private String normalizeBlackjackCommand(String command) {
+        if (command == null || command.isBlank()) {
+            return "/bj";
+        }
+
+        String raw = command.startsWith("/") ? command.substring(1) : command;
+        String loweredRaw = raw.toLowerCase();
+        if (loweredRaw.equals("bj") || loweredRaw.startsWith("bj ")
+            || loweredRaw.equals("blackjack") || loweredRaw.startsWith("blackjack ")) {
+            return command;
+        }
+
+        int firstWhitespace = findFirstWhitespace(raw);
+        String action = firstWhitespace < 0 ? raw : raw.substring(0, firstWhitespace);
+        String arguments = firstWhitespace < 0 ? "" : raw.substring(firstWhitespace);
+
+        return switch (action.toLowerCase()) {
+            case "createtable", "settable", "removetable", "join", "leave", "start", "hit", "stand",
+                "doubledown", "bet", "stats", "reload" -> "/bj " + action.toLowerCase() + arguments;
+            case "dd" -> "/bj doubledown" + arguments;
+            case "bjversion", "version" -> "/bj version" + arguments;
+            default -> command;
+        };
+    }
+
+    private int findFirstWhitespace(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.isWhitespace(value.charAt(i))) {
+                return i;
+            }
+        }
+        return -1;
     }
     
     public String getButtonHover(String buttonName) {

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Handles /settable with tab completion for setting names and current values.
+ * Handles blackjack table setting forwarding with setting name and value suggestions.
  */
 public class SettableCommand extends BlackjackCommand {
 

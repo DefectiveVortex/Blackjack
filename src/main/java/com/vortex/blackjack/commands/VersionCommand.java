@@ -6,7 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 /**
- * Handle the /bjversion command for checking plugin version
+ * Handle blackjack version output for checking plugin version.
  */
 public class VersionCommand extends BlackjackCommand {
     private final VersionChecker versionChecker;
