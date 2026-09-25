@@ -1,5 +1,6 @@
-# Messages Configuration File
-# This file contains all user-facing messages for internationalization support
+# Messages Configuration File (English)
+# This file contains all user-facing messages. Other languages live in messages_<code>.yml;
+# pick one with `language:` in config.yml. Keys missing from a translation fall back to this text.
 # Color codes: &0-&9, &a-&f for colors, &l (bold), &n (underline), &o (italic), &k (magic), &m (strikethrough), &r (reset)
 # Placeholders are marked with %placeholder_name%
 
@@ -10,17 +11,34 @@ player-only-command: "&cThis command can only be used by players!"
 
 # Table management
 table-created: "&aBlackjack table created!"
-table-created-with-settings: "&aTable created! &7(min: &e%min_bet%&7, max: &e%max_bet%&7, players: &e%max_players%&7, distance: &e%max_join_distance%&7)"
+table-created-with-settings: "&aTable #%id% created! &7(min: &e%min_bet%&7, max: &e%max_bet%&7, players: &e%max_players%&7, distance: &e%max_join_distance%&7)"
 createtable-invalid-arg: "&cInvalid argument: %error%"
 table-removed: "&cBlackjack table removed!"
 table-already-exists: "&cTable already exists at this location!"
 table-remove-failed: "&cFailed to remove table!"
 no-table-nearby: "&cNo table found nearby!"
+table-not-found-id: "&cThere's no table with ID %id%."
+tables-header: "&6Blackjack tables (%count%):"
+tables-entry: "&e#%id% &7%world% %x%, %y%, %z% &8| &f%players%/%max_players% players"
+tables-none: "&7There are no blackjack tables yet."
 settable-usage: "&eUsage: /bj settable <setting> <value>"
 settable-unknown-setting: "&cUnknown setting '%setting%'. Valid: min-bet, max-bet, max-players, max-join-distance"
 settable-invalid-value: "&cInvalid value: '%value%'"
 settable-validation-error: "&cValidation failed: %error%"
 settable-updated: "&aSetting &e%setting% &aset to &e%value% &aon nearest table."
+
+# Table setting errors (inserted into createtable-invalid-arg and settable-validation-error)
+table-error-min-exceeds-max: "min-bet (%min_bet%) cannot exceed max-bet (%max_bet%)"
+table-error-max-players-range: "max-players must be between 1 and %max%"
+table-error-min-distance: "max-join-distance must be at least 1"
+table-error-invalid-format: "Invalid argument '%arg%', expected key:value"
+table-error-unknown-setting: "Unknown setting '%setting%'. Valid: min-bet, max-bet, max-players, max-join-distance"
+table-error-invalid-value: "Invalid value for '%setting%': %value%"
+
+# Card cleanup (/bj cleanup)
+cleanup-usage: "&cUsage: /bj cleanup [radius]"
+cleanup-done: "&aRemoved %count% leftover card display(s) within %radius% blocks."
+cleanup-none: "&7No leftover card displays within %radius% blocks."
 
 # Player table status
 already-at-table: "&cYou are already at a table! Use /bj leave to leave your current table."
@@ -31,9 +49,21 @@ left-table: "&aYou left the table."
 left-table-bet-refunded: "&aYou left the table and your bet of $%amount% has been refunded."
 left-table-bet-forfeit: "&cYou left the table mid-game and forfeit your bet of $%amount%."
 
+# Seats (table.seat-players): sneaking stands you up
+seat-hint: "&7Sneak to stand up and leave the table."
+seat-leave-confirm-refund: "&eSneak again within 3 seconds to leave. Your hand is still in play, so your $%amount% bet will be refunded."
+seat-leave-confirm-forfeit: "&eSneak again within 3 seconds to leave. Your hand is already decided, so your $%amount% bet will be forfeited."
+
+# Leave reasons (fill %reason% in player-left-table and player-left-during-turn)
+leave-reason-left: "left the table"
+leave-reason-disconnected: "disconnected from the server"
+leave-reason-too-far: "moved too far from the table"
+leave-reason-inactive: "was removed due to inactivity"
+
 # Table joining
 table-full: "&cThis table is full!"
 too-far: "&cYou are too far from the table to join!"
+join-insufficient-funds: "&cYou need at least $%min_bet% to sit at this table."
 no-seats: "&cNo available seats!"
 join-error: "&cError joining table. Please try again."
 game-in-progress: "&cCannot perform this action during an active game!"
@@ -67,6 +97,28 @@ quick-bet-title: "&6&l                          QUICK BET"
 betting-category-small: "&7Small: "
 betting-category-medium: "&7Medium: "
 betting-category-large: "&7Large: "
+quick-bet-hover: "&eClick to bet $%amount%"
+
+# Chip menu (betting.menu: gui, also /bj bet with no amount)
+bet-menu-title: "&8Place your bet"
+bet-menu-info-name: "&6&lYour bet"
+bet-menu-info-balance: "&7Balance: &f%balance%"
+bet-menu-info-bet: "&7Current bet: &f%bet%"
+bet-menu-info-limits: "&7Table limits: &f%min_bet% &7- &f%max_bet%"
+bet-menu-chip-lore: "&eClick to bet %amount%"
+bet-menu-chip-too-low: "&cBelow this table's minimum"
+bet-menu-chip-too-high: "&cAbove this table's maximum"
+bet-menu-chip-unaffordable: "&cYou can't afford this"
+bet-menu-custom-name: "&b&lCustom amount"
+bet-menu-custom-lore: "&7Type any amount in chat"
+bet-menu-close: "&cClose"
+bet-custom-prompt: "&eType your bet in chat, or &fcancel&e."
+bet-custom-cancelled: "&7Bet cancelled."
+# Also accepted to cancel, besides "cancel"
+bet-custom-cancel-word: "cancel"
+
+# How amounts are written on quick bet buttons and in PlaceholderAPI *_formatted values
+currency-format: "$%amount%"
 
 # Game flow
 your-turn: "&aIt's your turn!"
@@ -77,10 +129,7 @@ dealer-value: "&aDealer's final hand value: %value%"
 # Game actions
 player-busts: "&c%player% busts!"
 player-stands: "&a%player% stands at %value%!"
-player-wins: "&a%player% wins and gets back $%amount%!"
-player-loses: "&c%player% loses their bet of $%amount%!"
 player-pushes: "&e%player% pushes and gets their bet of %amount% back!"
-player-blackjack: "&6%player% got BLACKJACK and wins $%amount%!"
 
 # Double down
 double-down-first-two-cards: "&cYou can only double down on your first two cards!"
@@ -90,6 +139,9 @@ double-down-insufficient-funds: "&cYou don't have enough money to double down!"
 # Hand display
 hand-display: "&bHand: %hand% | %hand_value%"
 dealer-shows: "&aDealer shows: %card% | %value%"
+dealer-final-hand: "&fDealer: %hand% | %value%"
+# The value part of a hand; colour and bold are added by the plugin (gold for 21, red for bust)
+hand-value-format: "Value: %value%"
 
 # Statistics
 stats-header: "&6=== Blackjack Statistics ==="
@@ -115,15 +167,18 @@ config-reloaded: "&aConfiguration reloaded!"
 help-header: "&rAvailable Commands:"
 help-admin-create: "&e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Create a table"
 help-admin-settable: "&e/bj settable <setting> <value> &7- Modify nearest table settings"
-help-admin-remove: "&e/bj removetable &7- Remove the nearest table"
+help-admin-remove: "&e/bj removetable [id] &7- Remove the nearest table, or one by ID"
+help-admin-tables: "&e/bj tables &7- List all tables with their IDs"
 help-admin-reload: "&e/bj reload &7- Reload configuration"
 help-admin-version: "&e/bj version &7- Check plugin version and update status"
+help-admin-cleanup: "&e/bj cleanup [radius] &7- Remove leftover card displays nearby"
 help-join: "&e/bj join &7- Join the nearest table"
 help-leave: "&e/bj leave &7- Leave your current table"
-help-bet: "&e/bj bet <amount> &7- Place or change your bet"
+help-bet: "&e/bj bet [amount] &7- Place or change your bet (no amount opens the chip menu)"
 help-start: "&e/bj start &7- Start a new game"
 help-hit: "&e/bj hit &7- Take another card"
 help-stand: "&e/bj stand &7- End your turn"
+help-doubledown: "&e/bj doubledown &7- Double your bet and take exactly one more card"
 help-stats: "&e/bj stats &7- View your statistics"
 help-stats-others: "&e/bj stats <player> &7- View another player's statistics"
 
@@ -137,6 +192,9 @@ player-joined-table: "&a%player% joined the table!"
 game-started: "&aGame started! &b%player%'s turn"
 game-ended: "&aGame ended!"
 player-turn: "&b%player%'s turn"
+# Turn timer (game.turn-timeout-seconds): countdown above the hotbar, then an automatic stand
+turn-timer: "&eYour turn &7- &f%seconds%s &7to hit or stand"
+turn-timeout: "&e%player% ran out of time and stands."
 player-hits-21: "%player% &6hits 21!&r"
 player-doubles-down: "%player% &6DOUBLES DOWN&r with %value%"
 
@@ -152,6 +210,28 @@ balance-display: "&aYour balance: &6%balance%%currency% &a| Current bet: &6%curr
 # Hardcoded game error messages (for consistent display)
 game-error-no-players: "&cCannot start game with no players!"
 game-error-all-must-bet: "&cAll players must place bets before starting!"
+
+# Shown by the client when it's offered the card resource pack
+resource-pack-prompt: "&6Blackjack &7uses the &fPlaying Cards &7resource pack to show cards on the table."
+
+# /bj version
+version-header: "&6&l=== Blackjack Plugin Version Info ==="
+version-plugin: "&fPlugin: &aBlackjack"
+version-author: "&fAuthor: &bDefectiveVortex"
+version-current: "&fCurrent Version: &a%version%"
+version-latest: "&fLatest Version: &a%version%"
+version-github: "&7GitHub: &9https://github.com/DefectiveVortex/Blackjack"
+
+# Update notice shown to admins on join
+update-available-header: "&6&lA Blackjack update is available"
+update-available-current: "&fCurrent version: &c%version%"
+update-available-latest: "&fLatest version: &a%version%"
+update-available-download: "&bDownload: &9%url%"
+update-available-hint: "&7Use &f/bj version &7for details"
+update-check-failed: "&cFailed to check for updates. Please check your internet connection."
+update-checking: "&eChecking for updates..."
+update-outdated: "&cOutdated! Current: %current% | Latest: &a%latest%"
+update-up-to-date: "&aUp to date! Current version: %version%"
 
 # Button configuration
 buttons:
@@ -199,7 +279,7 @@ game-action-prompt: "&7Your turn: "
 game-action-separator: "&7 | "
 post-game-prompt: "&7Choose: "
 
-# Console and system messages
+# Console and system messages (console output stays in English; these aren't translated)
 console-economy-provider-not-found: "No supported economy plugin found! Please install Vault with an economy plugin."
 console-economy-provider-loaded: "Economy provider loaded: %provider%"
 console-gsit-found: "GSit found! Players will automatically sit when joining tables."

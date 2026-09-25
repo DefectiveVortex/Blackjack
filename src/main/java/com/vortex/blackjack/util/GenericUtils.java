@@ -5,7 +5,9 @@ import com.vortex.blackjack.model.PlayerStats;
 import com.vortex.blackjack.table.BlackjackTable;
 import com.vortex.blackjack.table.TableManager;
 import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -76,7 +78,7 @@ public class GenericUtils {
     public static TextComponent createClickableButton(String text, String command, String hoverText) {
         TextComponent button = new TextComponent(org.bukkit.ChatColor.translateAlternateColorCodes('&', text));
         button.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
-        // Note: Hover events removed due to API compatibility
+        addHover(button, hoverText);
         return button;
     }
     
@@ -86,8 +88,20 @@ public class GenericUtils {
     public static TextComponent createSuggestionButton(String text, String command, String hoverText) {
         TextComponent button = new TextComponent(org.bukkit.ChatColor.translateAlternateColorCodes('&', text));
         button.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
-        // Note: Hover events removed due to API compatibility
+        addHover(button, hoverText);
         return button;
+    }
+
+    /**
+     * Attach hover text using the Content-based API (bungee-chat 1.16+), which every server
+     * version this plugin loads on ships. The older BaseComponent[] constructor is what broke.
+     */
+    private static void addHover(TextComponent button, String hoverText) {
+        if (hoverText == null || hoverText.isEmpty()) {
+            return;
+        }
+        String colored = org.bukkit.ChatColor.translateAlternateColorCodes('&', hoverText);
+        button.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(TextComponent.fromLegacyText(colored))));
     }
     
     /**
@@ -101,9 +115,9 @@ public class GenericUtils {
             if (i > 0) row.addExtra(" ");
             
             int amount = amounts.get(i);
-            String buttonText = configManager.getBetColorByAmount(amount) + "$" + amount;
+            String buttonText = configManager.getBetColorByAmount(amount) + configManager.formatCurrency(amount);
             String command = "/bj bet " + amount;
-            String hoverText = "§eClick to bet $" + amount;
+            String hoverText = configManager.formatMessage("quick-bet-hover", "amount", amount);
             
             TextComponent button = createClickableButton(buttonText, command, hoverText);
             row.addExtra(button);

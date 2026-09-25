@@ -1,8 +1,7 @@
 package com.vortex.blackjack.util;
 
-import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import com.vortex.blackjack.config.ConfigManager;
 
@@ -23,13 +22,16 @@ public class ChatUtils {
      * Send a clickable message to perform a command
      */
     public void sendClickableCommand(Player player, String message, String command, String hoverText) {
-        TextComponent text = new TextComponent(ChatColor.translateAlternateColorCodes('&', message));
-        text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
-        // Skip hover event for now due to API changes
-        
-        player.spigot().sendMessage(text);
+        player.spigot().sendMessage(GenericUtils.createClickableButton(message, command, hoverText));
     }
     
+    /**
+     * Show a short line above the hotbar (used for the turn countdown)
+     */
+    public void sendActionBar(Player player, String message) {
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message));
+    }
+
     /**
      * Send a clickable message to suggest a command
      */

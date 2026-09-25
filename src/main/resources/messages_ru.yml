@@ -1,0 +1,278 @@
+# Blackjack messages: Russian (Русский)
+# Use it by setting `language: ru` in config.yml. Keys missing here fall back to English.
+# Colour codes: &0-&9, &a-&f, &l bold, &n underline, &o italic, &r reset. %placeholders% are filled in by the plugin.
+
+# Core messages
+prefix: "&8[&6Блэкджек&8] &r"
+no-permission: "&cУ вас нет прав на это!"
+player-only-command: "&cЭту команду могут использовать только игроки!"
+
+# Table management
+table-created: "&aСтол для блэкджека создан!"
+table-created-with-settings: "&aСтол #%id% создан! &7(мин.: &e%min_bet%&7, макс.: &e%max_bet%&7, игроков: &e%max_players%&7, дистанция: &e%max_join_distance%&7)"
+createtable-invalid-arg: "&cНеверный аргумент: %error%"
+table-removed: "&cСтол для блэкджека удалён!"
+table-already-exists: "&cЗдесь уже есть стол!"
+table-remove-failed: "&cНе удалось удалить стол!"
+no-table-nearby: "&cПоблизости нет стола!"
+table-not-found-id: "&cСтола с ID %id% нет."
+tables-header: "&6Столы для блэкджека (%count%):"
+tables-entry: "&e#%id% &7%world% %x%, %y%, %z% &8| &fигроков: %players%/%max_players%"
+tables-none: "&7Столов для блэкджека пока нет."
+settable-usage: "&eИспользование: /bj settable <параметр> <значение>"
+settable-unknown-setting: "&cНеизвестный параметр '%setting%'. Доступны: min-bet, max-bet, max-players, max-join-distance"
+settable-invalid-value: "&cНеверное значение: '%value%'"
+settable-validation-error: "&cПроверка не пройдена: %error%"
+settable-updated: "&aПараметр &e%setting% &aближайшего стола теперь &e%value%&a."
+
+# Table setting errors (inserted into createtable-invalid-arg and settable-validation-error)
+table-error-min-exceeds-max: "min-bet (%min_bet%) не может быть больше max-bet (%max_bet%)"
+table-error-max-players-range: "max-players должно быть от 1 до %max%"
+table-error-min-distance: "max-join-distance должно быть не меньше 1"
+table-error-invalid-format: "Неверный аргумент '%arg%', нужен формат ключ:значение"
+table-error-unknown-setting: "Неизвестный параметр '%setting%'. Доступны: min-bet, max-bet, max-players, max-join-distance"
+table-error-invalid-value: "Неверное значение для '%setting%': %value%"
+
+# Card cleanup (/bj cleanup)
+cleanup-usage: "&cИспользование: /bj cleanup [радиус]"
+cleanup-done: "&aУбрано оставшихся карт: %count% (в радиусе %radius% бл.)."
+cleanup-none: "&7В радиусе %radius% бл. оставшихся карт нет."
+
+# Player table status
+already-at-table: "&cВы уже за столом! Чтобы выйти, введите /bj leave."
+not-at-table: "&cВы не за столом! Подойдите к столу и введите /bj join."
+auto-left-table: "&eВы отошли слишком далеко от стола и покинули игру."
+auto-left-inactive: "&eВас убрали из-за стола за бездействие, чтобы могли сыграть другие."
+left-table: "&aВы вышли из-за стола."
+left-table-bet-refunded: "&aВы вышли из-за стола, ставка $%amount% возвращена."
+left-table-bet-forfeit: "&cВы вышли посреди игры, ставка $%amount% сгорает."
+
+# Seats (table.seat-players): sneaking stands you up
+seat-hint: "&7Присядьте (Shift), чтобы встать и уйти из-за стола."
+seat-leave-confirm-refund: "&eПрисядьте ещё раз в течение 3 секунд, чтобы уйти. Ваша рука ещё в игре, поэтому ставка $%amount% вернётся."
+seat-leave-confirm-forfeit: "&eПрисядьте ещё раз в течение 3 секунд, чтобы уйти. Ваша рука уже сыграна, поэтому ставка $%amount% сгорит."
+
+# Leave reasons (fill %reason% in player-left-table and player-left-during-turn)
+leave-reason-left: "вышел(а) из-за стола"
+leave-reason-disconnected: "отключился(ась) от сервера"
+leave-reason-too-far: "отошёл(ла) слишком далеко от стола"
+leave-reason-inactive: "убран(а) из-за стола за бездействие"
+
+# Table joining
+table-full: "&cЗа этим столом нет мест!"
+too-far: "&cВы слишком далеко от стола, чтобы сесть за него!"
+join-insufficient-funds: "&cЧтобы сесть за этот стол, нужно не меньше $%min_bet%."
+no-seats: "&cСвободных мест нет!"
+join-error: "&cНе удалось сесть за стол. Попробуйте ещё раз."
+game-in-progress: "&cЭто нельзя сделать во время игры!"
+
+# Betting
+bet-required: "&cЧтобы начать игру, сделайте ставку! Используйте /bj bet <сумма>"
+invalid-bet: "&cНеверная ставка! Допустимо от %min_bet% до %max_bet%."
+insufficient-funds: "&cУ вас не хватает денег на ставку $%amount%!"
+bet-cooldown: "&cПодождите немного, прежде чем снова менять ставку."
+bet-set: "&aВаша ставка: $%amount%!"
+bet-already-set: "&eВаша ставка уже $%amount%!"
+betting-locked: "&cСтавки закрыты, пока идёт или подсчитывается текущий раунд."
+bet-refunded: "&aВаша ставка $%amount% возвращена."
+bet-refunded-shutdown: "&aСтавка возвращена из-за остановки сервера: $%amount%"
+bet-reduced-refunded: "&aСтавка снижена до $%amount%, возвращено $%refund%!"
+auto-bet-placed: "&aСтавка сделана автоматически: $%amount%"
+invalid-amount: "&cНеверная сумма!"
+bet-usage: "&cИспользование: /bj bet <сумма>"
+bet-failed: "&cНе удалось принять ставку!"
+bet-refund-failed: "&cНе удалось вернуть ставку!"
+error-refund: "&cПри возврате ставки произошла ошибка. Обратитесь к администрации!"
+error-payout: "&cПри выплате выигрыша произошла ошибка. Обратитесь к администрации!"
+
+# Quick bet menu
+quick-bet-header: "&6&l=== Быстрые ставки ==="
+quick-bet-description: "&7Нажмите на сумму, чтобы поставить:"
+quick-bet-border: "&e&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+quick-bet-title: "&6&l                        БЫСТРАЯ СТАВКА"
+
+# Betting category labels
+betting-category-small: "&7Малые: "
+betting-category-medium: "&7Средние: "
+betting-category-large: "&7Крупные: "
+quick-bet-hover: "&eНажмите, чтобы поставить $%amount%"
+
+# Chip menu (betting.menu: gui, also /bj bet with no amount)
+bet-menu-title: "&8Ваша ставка"
+bet-menu-info-name: "&6&lВаша ставка"
+bet-menu-info-balance: "&7Баланс: &f%balance%"
+bet-menu-info-bet: "&7Текущая ставка: &f%bet%"
+bet-menu-info-limits: "&7Лимиты стола: &f%min_bet% &7- &f%max_bet%"
+bet-menu-chip-lore: "&eНажмите, чтобы поставить %amount%"
+bet-menu-chip-too-low: "&cМеньше минимума этого стола"
+bet-menu-chip-too-high: "&cБольше максимума этого стола"
+bet-menu-chip-unaffordable: "&cНе хватает денег"
+bet-menu-custom-name: "&b&lСвоя сумма"
+bet-menu-custom-lore: "&7Введите любую сумму в чат"
+bet-menu-close: "&cЗакрыть"
+bet-custom-prompt: "&eВведите ставку в чат или &fотмена&e, чтобы передумать."
+bet-custom-cancelled: "&7Ставка отменена."
+# Also accepted to cancel, besides "cancel"
+bet-custom-cancel-word: "отмена"
+
+# How amounts are written on quick bet buttons and in PlaceholderAPI *_formatted values
+currency-format: "$%amount%"
+
+# Game flow
+your-turn: "&aВаш ход!"
+hand-value: "&aОчки на руке: %value%"
+dealer-card: "&aОткрытая карта дилера: %card% | Очки: %value%"
+dealer-value: "&aИтог дилера: %value%"
+
+# Game actions
+player-busts: "&c%player%: перебор!"
+player-stands: "&a%player% остаётся при %value%!"
+player-pushes: "&e%player%: ничья, ставка %amount% возвращается!"
+
+# Double down
+double-down-first-two-cards: "&cУдвоить можно только на первых двух картах!"
+double-down-already-used: "&cВы уже удвоили ставку!"
+double-down-insufficient-funds: "&cНе хватает денег, чтобы удвоить ставку!"
+
+# Hand display
+hand-display: "&bРука: %hand% | %hand_value%"
+dealer-shows: "&aОткрытая карта дилера: %card% | %value%"
+dealer-final-hand: "&fДилер: %hand% | %value%"
+# The value part of a hand; colour and bold are added by the plugin (gold for 21, red for bust)
+hand-value-format: "Очки: %value%"
+
+# Statistics
+stats-header: "&6=== Статистика блэкджека ==="
+stats-other-player-header: "&6=== Статистика блэкджека: %player% ==="
+stats-hands-won: "&eВыиграно раздач: &a%value%"
+stats-hands-lost: "&eПроиграно раздач: &c%value%"
+stats-hands-pushed: "&eНичьих: &7%value%"
+stats-blackjacks: "&eБлэкджеков: &6%value%"
+stats-busts: "&eПереборов: &c%value%"
+stats-win-rate: "&eПроцент побед: &a%value%%"
+stats-current-streak: "&eТекущая серия: &b%value%"
+stats-best-streak: "&eЛучшая серия: &a%value%"
+stats-total-winnings: "&eОбщий выигрыш: &2$%value%"
+stats-no-permission: "&cУ вас нет прав смотреть статистику других игроков!"
+stats-player-not-found: "&cИгрок не найден: %player%"
+stats-none-found: "&cСтатистики пока нет!"
+stats-none-found-player: "&cУ игрока %player% пока нет статистики!"
+
+# Configuration
+config-reloaded: "&aКонфигурация перезагружена!"
+
+# Help command
+help-header: "&rДоступные команды:"
+help-admin-create: "&e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Создать стол"
+help-admin-settable: "&e/bj settable <параметр> <значение> &7- Изменить настройки ближайшего стола"
+help-admin-remove: "&e/bj removetable [id] &7- Удалить ближайший стол или стол с указанным ID"
+help-admin-tables: "&e/bj tables &7- Список всех столов с их ID"
+help-admin-reload: "&e/bj reload &7- Перезагрузить конфигурацию"
+help-admin-version: "&e/bj version &7- Проверить версию плагина и обновления"
+help-admin-cleanup: "&e/bj cleanup [радиус] &7- Убрать оставшиеся карты поблизости"
+help-join: "&e/bj join &7- Сесть за ближайший стол"
+help-leave: "&e/bj leave &7- Выйти из-за стола"
+help-bet: "&e/bj bet [сумма] &7- Сделать или изменить ставку (без суммы откроется меню фишек)"
+help-start: "&e/bj start &7- Начать новую игру"
+help-hit: "&e/bj hit &7- Взять ещё карту"
+help-stand: "&e/bj stand &7- Закончить ход"
+help-doubledown: "&e/bj doubledown &7- Удвоить ставку и взять ровно одну карту"
+help-stats: "&e/bj stats &7- Посмотреть свою статистику"
+help-stats-others: "&e/bj stats <игрок> &7- Посмотреть статистику другого игрока"
+
+# Table broadcast messages
+table-message-broadcast: "&e%message%"
+player-left-during-turn: "&c%player% %reason% во время своего хода."
+player-left-table: "&c%player% %reason%."
+
+# Game status messages
+player-joined-table: "&a%player% садится за стол!"
+game-started: "&aИгра началась! &bХодит %player%"
+game-ended: "&aИгра окончена!"
+player-turn: "&bХодит %player%"
+# Turn timer (game.turn-timeout-seconds): countdown above the hotbar, then an automatic stand
+turn-timer: "&eВаш ход &7- &f%seconds% с &7на решение"
+turn-timeout: "&eУ %player% вышло время, рука остаётся как есть."
+player-hits-21: "%player% &6набирает 21!&r"
+player-doubles-down: "%player% &6УДВАИВАЕТ&r ставку: %value%"
+
+# Game result messages  
+player-blackjack: "&6&l%player%: БЛЭКДЖЕК! &a+$%payout%"
+player-wins: "&a&l%player% ВЫИГРЫВАЕТ! &a+$%payout%"
+player-loses: "&c&l%player% проигрывает -$%amount%"
+player-push: "&e&l%player%: НИЧЬЯ - $%amount% возвращено"
+
+# Balance display
+balance-display: "&aВаш баланс: &6%balance%%currency% &a| Текущая ставка: &6%current-bet%%currency%"
+
+# Hardcoded game error messages (for consistent display)
+game-error-no-players: "&cНельзя начать игру без игроков!"
+game-error-all-must-bet: "&cПеред началом все игроки должны сделать ставки!"
+
+# Shown by the client when it's offered the card resource pack
+resource-pack-prompt: "&6Блэкджек &7использует ресурспак &fPlaying Cards&7, чтобы показывать карты на столе."
+
+# /bj version
+version-header: "&6&l=== Версия плагина Blackjack ==="
+version-plugin: "&fПлагин: &aBlackjack"
+version-author: "&fАвтор: &bDefectiveVortex"
+version-current: "&fТекущая версия: &a%version%"
+version-latest: "&fПоследняя версия: &a%version%"
+version-github: "&7GitHub: &9https://github.com/DefectiveVortex/Blackjack"
+
+# Update notice shown to admins on join
+update-available-header: "&6&lВышло обновление Blackjack"
+update-available-current: "&fТекущая версия: &c%version%"
+update-available-latest: "&fПоследняя версия: &a%version%"
+update-available-download: "&bСкачать: &9%url%"
+update-available-hint: "&7Подробности: &f/bj version"
+update-check-failed: "&cНе удалось проверить обновления. Проверьте подключение к интернету."
+update-checking: "&eПроверяем обновления..."
+update-outdated: "&cВерсия устарела! Текущая: %current% | Последняя: &a%latest%"
+update-up-to-date: "&aУстановлена последняя версия: %version%"
+
+# Button configuration
+buttons:
+  # Game action buttons
+  hit:
+    text: "&a&l[ЕЩЁ]"
+    command: "/bj hit"
+    hover: "&eНажмите, чтобы взять ещё карту"
+  
+  stand:
+    text: "&c&l[ХВАТИТ]"
+    command: "/bj stand"
+    hover: "&eНажмите, чтобы закончить ход"
+  
+  double-down:
+    text: "&6&l[УДВОИТЬ]"
+    command: "/bj doubledown"
+    hover: "&eНажмите, чтобы удвоить ставку и взять одну карту"
+  
+  # Post-game buttons
+  play-again:
+    text: "&a&l[Сыграть ещё]"
+    command: "/bj start"
+    hover: "&eНажмите, чтобы начать новую игру"
+  
+  leave-table:
+    text: "&c&l[Выйти из-за стола]"
+    command: "/bj leave"
+    hover: "&eНажмите, чтобы выйти из-за стола"
+  
+  # Betting buttons
+  custom-bet:
+    text: "&b&l[СВОЯ СТАВКА]"
+    command: "/bj bet "
+    hover: "&eНажмите, чтобы ввести свою сумму"
+  
+  # Bet amount colors
+  small-bet-color: "&a"    # Green for small bets
+  medium-bet-color: "&e"   # Yellow for medium bets  
+  large-bet-color: "&c"    # Red for large bets
+  huge-bet-color: "&d"     # Pink for huge bets
+
+# Game action prompts
+game-action-prompt: "&7Ваш ход: "
+game-action-separator: "&7 | "
+post-game-prompt: "&7Выберите: "

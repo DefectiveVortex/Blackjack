@@ -1,10 +1,19 @@
+# Language for player-facing messages: en, ko (Korean), tr (Turkish), ru (Russian).
+# English is read from messages.yml, other languages from messages_<code>.yml, which is
+# created the first time you pick it. To add your own language, drop a messages_<code>.yml
+# into this folder and set its code here. Apply with /bj reload.
+language: en
+
 # Betting Settings
 betting:
   min-bet: 10
   max-bet: 10000
   cooldown-ms: 2000
   
-  # Quick Bet Options (shown in chat when betting)
+  # How players pick a bet when they sit down: gui (a chest menu of chips) or chat (clickable amounts)
+  menu: gui
+
+  # Quick bet amounts: the chips in the bet menu and the buttons in chat
   quick-bets:
     small: [10, 25, 50]
     medium: [100, 250, 500]
@@ -13,7 +22,12 @@ betting:
 # Table Settings
 table:
   max-join-distance: 10.0
-  max-players: 4
+  max-players: 4  # 1-4; a table is built with four chairs
+  # Sit players on the chairs; they stand up (and leave) by sneaking. When false they're only
+  # teleported next to the chair (and GSit's /sit is used if it's installed).
+  seat-players: true
+  # Right-click a chair or the table to sit down; right-click the table while seated for the bet menu
+  click-to-join: true
   table-material: GREEN_TERRACOTTA
   chair-material: DARK_OAK_STAIRS
 
@@ -21,16 +35,30 @@ table:
 game:
   hit-soft-17: false  # Whether dealer hits on soft 17
   auto-leave-timeout-seconds: 30  # Time before inactive players are auto-removed when others are waiting
+  turn-timeout-seconds: 30  # Time a player gets on their turn before they automatically stand (0 = no limit)
 
 # Card Display Settings (Original working system - minimal config)
 display:
   card:
+    # 3D cards on the table. Players need the Playing Cards resource pack (1.2+ on servers older than 1.21.2)
+    enabled: true
     scale: 0.35
     spacing: 0.25
     player:
       height: 1.05
     dealer:
       height: 1.2
+
+# Card Resource Pack
+# The 3D cards only render with the Playing Cards pack. When a player sits down at a table
+# they're offered it once per session. It's added on top of your server resource pack
+# rather than replacing it. Set send-on-join to false if you already ship the textures.
+resource-pack:
+  send-on-join: true
+  url: "https://cdn.modrinth.com/data/avUalEYy/versions/ja1dIOhP/Playing-Cards-1.2.zip"
+  sha1: "897ca10946641e1fbebe98fcf6e242a070008acb"
+  # true kicks players who decline the pack
+  required: false
 
 # Sound Settings
 sounds:

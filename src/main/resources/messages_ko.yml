@@ -1,0 +1,279 @@
+# Blackjack messages: Korean (한국어)
+# Use it by setting `language: ko` in config.yml. Keys missing here fall back to English.
+# Translated by yldst-dev (https://github.com/yldst-dev/Blackjack).
+# Colour codes: &0-&9, &a-&f, &l bold, &n underline, &o italic, &r reset. %placeholders% are filled in by the plugin.
+
+# Core messages
+prefix: "&8[&6블랙잭&8] &r"
+no-permission: "&c이 명령어를 쓸 권한이 없습니다."
+player-only-command: "&c이 명령어는 플레이어만 쓸 수 있습니다."
+
+# Table management
+table-created: "&a블랙잭 테이블을 만들었습니다."
+table-created-with-settings: "&a테이블 #%id%을(를) 만들었습니다. &7(최소 &e%min_bet%&7, 최대 &e%max_bet%&7, 인원 &e%max_players%&7, 거리 &e%max_join_distance%&7)"
+createtable-invalid-arg: "&c잘못된 인자입니다: %error%"
+table-removed: "&c블랙잭 테이블을 제거했습니다."
+table-already-exists: "&c이 자리에는 이미 테이블이 있습니다."
+table-remove-failed: "&c테이블을 제거하지 못했습니다."
+no-table-nearby: "&c근처에 테이블이 없습니다."
+table-not-found-id: "&cID가 %id%인 테이블이 없습니다."
+tables-header: "&6블랙잭 테이블 (%count%개):"
+tables-entry: "&e#%id% &7%world% %x%, %y%, %z% &8| &f%players%/%max_players%명"
+tables-none: "&7아직 블랙잭 테이블이 없습니다."
+settable-usage: "&e사용법: /bj settable <설정> <값>"
+settable-unknown-setting: "&c모르는 설정입니다: '%setting%'. 쓸 수 있는 값: min-bet, max-bet, max-players, max-join-distance"
+settable-invalid-value: "&c잘못된 값입니다: '%value%'"
+settable-validation-error: "&c설정 검사 실패: %error%"
+settable-updated: "&a가장 가까운 테이블의 &e%setting% &a설정을 &e%value% &a(으)로 바꿨습니다."
+
+# Table setting errors (inserted into createtable-invalid-arg and settable-validation-error)
+table-error-min-exceeds-max: "최소 베팅(%min_bet%)이 최대 베팅(%max_bet%)보다 클 수 없습니다"
+table-error-max-players-range: "max-players 값은 1에서 %max% 사이여야 합니다"
+table-error-min-distance: "max-join-distance 값은 1 이상이어야 합니다"
+table-error-invalid-format: "'%arg%' 형식이 잘못되었습니다. key:value 형식으로 적으세요"
+table-error-unknown-setting: "모르는 설정입니다: '%setting%'. 쓸 수 있는 값: min-bet, max-bet, max-players, max-join-distance"
+table-error-invalid-value: "'%setting%' 설정에 넣은 값 '%value%'이(가) 잘못되었습니다"
+
+# Card cleanup (/bj cleanup)
+cleanup-usage: "&c사용법: /bj cleanup [반경]"
+cleanup-done: "&a반경 %radius%블록 안에 남아 있던 카드 %count%개를 치웠습니다."
+cleanup-none: "&7반경 %radius%블록 안에 남은 카드가 없습니다."
+
+# Player table status
+already-at-table: "&c이미 테이블에 앉아 있습니다. /bj leave 로 먼저 떠나세요."
+not-at-table: "&c테이블에 앉아 있지 않습니다. 테이블 근처에서 /bj join 을 쓰세요."
+auto-left-table: "&e테이블에서 너무 멀어져 자동으로 퇴장되었습니다."
+auto-left-inactive: "&e오랫동안 응답이 없어 자동으로 퇴장되었습니다."
+left-table: "&a테이블을 떠났습니다."
+left-table-bet-refunded: "&a테이블을 떠나 베팅금 %amount%원을 환불받았습니다."
+left-table-bet-forfeit: "&c게임 도중 떠나 베팅금 %amount%원을 몰수당했습니다."
+
+# Seats (table.seat-players): sneaking stands you up
+seat-hint: "&7웅크리면 일어나서 테이블을 떠납니다."
+seat-leave-confirm-refund: "&e떠나려면 3초 안에 한 번 더 웅크리세요. 아직 패가 진행 중이라 베팅금 %amount%원은 환불됩니다."
+seat-leave-confirm-forfeit: "&e떠나려면 3초 안에 한 번 더 웅크리세요. 이미 패가 끝나서 베팅금 %amount%원은 몰수됩니다."
+
+# Leave reasons (fill %reason% in player-left-table and player-left-during-turn)
+leave-reason-left: "테이블을 떠났습니다"
+leave-reason-disconnected: "서버에서 나갔습니다"
+leave-reason-too-far: "테이블에서 너무 멀리 떨어졌습니다"
+leave-reason-inactive: "오랫동안 응답이 없어 퇴장되었습니다"
+
+# Table joining
+table-full: "&c이 테이블은 자리가 가득 찼습니다."
+too-far: "&c테이블에서 너무 멀어 참가할 수 없습니다."
+join-insufficient-funds: "&c이 테이블에 앉으려면 최소 %min_bet%원이 있어야 합니다."
+no-seats: "&c빈 자리가 없습니다."
+join-error: "&c테이블에 참가하지 못했습니다. 다시 시도하세요."
+game-in-progress: "&c게임이 진행 중이라 지금은 할 수 없습니다."
+
+# Betting
+bet-required: "&c게임을 시작하려면 먼저 베팅해야 합니다. /bj bet <금액>"
+invalid-bet: "&c베팅 금액은 %min_bet%원에서 %max_bet%원 사이여야 합니다."
+insufficient-funds: "&c%amount%원을 베팅할 돈이 부족합니다."
+bet-cooldown: "&c베팅을 다시 바꾸려면 잠시 기다리세요."
+bet-set: "&a베팅금을 %amount%원으로 정했습니다."
+bet-already-set: "&e베팅금은 이미 %amount%원입니다."
+betting-locked: "&c이번 판이 진행 중이거나 정산 중이라 베팅할 수 없습니다."
+bet-refunded: "&a베팅금 %amount%원을 환불했습니다."
+bet-refunded-shutdown: "&a서버 종료로 베팅금 %amount%원을 환불했습니다."
+bet-reduced-refunded: "&a베팅금을 %amount%원으로 줄이고 %refund%원을 환불했습니다."
+auto-bet-placed: "&a자동 베팅: %amount%원"
+invalid-amount: "&c잘못된 금액입니다."
+bet-usage: "&c사용법: /bj bet <금액>"
+bet-failed: "&c베팅을 처리하지 못했습니다."
+bet-refund-failed: "&c베팅 환불을 처리하지 못했습니다."
+error-refund: "&c환불 중 오류가 났습니다. 관리자에게 알려 주세요."
+error-payout: "&c지급 중 오류가 났습니다. 관리자에게 알려 주세요."
+
+# Quick bet menu
+quick-bet-header: "&6&l=== 빠른 베팅 메뉴 ==="
+quick-bet-description: "&7금액을 눌러 베팅하세요:"
+quick-bet-border: "&e&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+quick-bet-title: "&6&l빠른 베팅"
+
+# Betting category labels
+betting-category-small: "&7소액: "
+betting-category-medium: "&7중액: "
+betting-category-large: "&7고액: "
+quick-bet-hover: "&e눌러서 %amount%원 베팅"
+
+# Chip menu (betting.menu: gui, also /bj bet with no amount)
+bet-menu-title: "&8베팅하기"
+bet-menu-info-name: "&6&l내 베팅"
+bet-menu-info-balance: "&7잔액: &f%balance%"
+bet-menu-info-bet: "&7현재 베팅: &f%bet%"
+bet-menu-info-limits: "&7테이블 한도: &f%min_bet% &7- &f%max_bet%"
+bet-menu-chip-lore: "&e눌러서 %amount% 베팅"
+bet-menu-chip-too-low: "&c이 테이블의 최소 베팅보다 적습니다"
+bet-menu-chip-too-high: "&c이 테이블의 최대 베팅보다 많습니다"
+bet-menu-chip-unaffordable: "&c돈이 부족합니다"
+bet-menu-custom-name: "&b&l금액 직접 입력"
+bet-menu-custom-lore: "&7채팅에 원하는 금액을 입력하세요"
+bet-menu-close: "&c닫기"
+bet-custom-prompt: "&e채팅에 베팅 금액을 입력하세요. 취소하려면 &f취소&e를 입력하세요."
+bet-custom-cancelled: "&7베팅을 취소했습니다."
+# Also accepted to cancel, besides "cancel"
+bet-custom-cancel-word: "취소"
+
+# How amounts are written on quick bet buttons and in PlaceholderAPI *_formatted values
+currency-format: "%amount%원"
+
+# Game flow
+your-turn: "&a차례가 되었습니다!"
+hand-value: "&a패의 점수: %value%"
+dealer-card: "&a딜러 오픈 카드: %card% | %value%점"
+dealer-value: "&a딜러의 최종 패 점수: %value%"
+
+# Game actions
+player-busts: "&c%player%님 버스트!"
+player-stands: "&a%player%님 스탠드 - %value%"
+player-pushes: "&e%player%님 푸시! 베팅금 %amount%원을 돌려받습니다."
+
+# Double down
+double-down-first-two-cards: "&c처음 두 장일 때만 더블다운할 수 있습니다."
+double-down-already-used: "&c이미 더블다운했습니다."
+double-down-insufficient-funds: "&c더블다운할 돈이 부족합니다."
+
+# Hand display
+hand-display: "&b패: %hand% | %hand_value%"
+dealer-shows: "&a딜러 오픈 카드: %card% | %value%점"
+dealer-final-hand: "&f딜러: %hand% | %value%"
+# The value part of a hand; colour and bold are added by the plugin (gold for 21, red for bust)
+hand-value-format: "%value%점"
+
+# Statistics
+stats-header: "&6=== 블랙잭 통계 ==="
+stats-other-player-header: "&6=== %player%님의 블랙잭 통계 ==="
+stats-hands-won: "&e이긴 판: &a%value%"
+stats-hands-lost: "&e진 판: &c%value%"
+stats-hands-pushed: "&e무승부 판: &7%value%"
+stats-blackjacks: "&e블랙잭: &6%value%"
+stats-busts: "&e버스트: &c%value%"
+stats-win-rate: "&e승률: &a%value%%"
+stats-current-streak: "&e현재 연승: &b%value%"
+stats-best-streak: "&e최고 연승: &a%value%"
+stats-total-winnings: "&e총 수익: &2%value%원"
+stats-no-permission: "&c다른 플레이어의 통계를 볼 권한이 없습니다."
+stats-player-not-found: "&c플레이어를 찾을 수 없습니다: %player%"
+stats-none-found: "&c통계가 없습니다."
+stats-none-found-player: "&c%player%님의 통계가 없습니다."
+
+# Configuration
+config-reloaded: "&a설정을 다시 불러왔습니다."
+
+# Help command
+help-header: "&r쓸 수 있는 명령어:"
+help-admin-create: "&e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- 테이블 만들기"
+help-admin-settable: "&e/bj settable <설정> <값> &7- 가장 가까운 테이블 설정 바꾸기"
+help-admin-remove: "&e/bj removetable [id] &7- 가장 가까운 테이블이나 ID로 고른 테이블 제거"
+help-admin-tables: "&e/bj tables &7- 모든 테이블과 ID 보기"
+help-admin-reload: "&e/bj reload &7- 설정 다시 불러오기"
+help-admin-version: "&e/bj version &7- 버전과 업데이트 상태 확인"
+help-admin-cleanup: "&e/bj cleanup [반경] &7- 근처에 남은 카드 치우기"
+help-join: "&e/bj join &7- 가장 가까운 테이블에 참가"
+help-leave: "&e/bj leave &7- 테이블에서 떠나기"
+help-bet: "&e/bj bet [금액] &7- 베팅하거나 금액 바꾸기 (금액 없이 쓰면 칩 메뉴 열기)"
+help-start: "&e/bj start &7- 새 게임 시작"
+help-hit: "&e/bj hit &7- 카드 한 장 더 받기"
+help-stand: "&e/bj stand &7- 차례 끝내기"
+help-doubledown: "&e/bj doubledown &7- 베팅을 두 배로 하고 카드 한 장만 받기"
+help-stats: "&e/bj stats &7- 통계 보기"
+help-stats-others: "&e/bj stats <플레이어> &7- 다른 플레이어의 통계 보기"
+
+# Table broadcast messages
+table-message-broadcast: "&e%message%"
+player-left-during-turn: "&c%player%님이 차례 도중 %reason%."
+player-left-table: "&c%player%님이 %reason%."
+
+# Game status messages
+player-joined-table: "&a%player%님이 테이블에 참가했습니다!"
+game-started: "&a게임 시작! &b%player%님의 차례"
+game-ended: "&a게임이 끝났습니다!"
+player-turn: "&b%player%님의 차례"
+# Turn timer (game.turn-timeout-seconds): countdown above the hotbar, then an automatic stand
+turn-timer: "&e내 차례 &7- &f%seconds%초 &7안에 히트나 스탠드"
+turn-timeout: "&e%player%님이 시간을 넘겨 자동으로 스탠드합니다."
+player-hits-21: "%player%님 &621점!&r"
+player-doubles-down: "%player%님 &6더블다운&r - %value%"
+
+# Game result messages  
+player-blackjack: "&6&l%player%님 블랙잭! &a+%payout%원"
+player-wins: "&a&l%player%님 승리! &a+%payout%원"
+player-loses: "&c&l%player%님 패배 -%amount%원"
+player-push: "&e&l%player%님 푸시(무승부) - %amount%원 반환"
+
+# Balance display
+balance-display: "&a잔액: &6%balance%%currency% &a| 현재 베팅: &6%current-bet%%currency%"
+
+# Hardcoded game error messages (for consistent display)
+game-error-no-players: "&c플레이어가 없어 게임을 시작할 수 없습니다."
+game-error-all-must-bet: "&c모든 플레이어가 베팅해야 시작할 수 있습니다."
+
+# Shown by the client when it's offered the card resource pack
+resource-pack-prompt: "&6블랙잭&7은 테이블 위에 카드를 보여 주려고 &fPlaying Cards &7리소스팩을 씁니다."
+
+# /bj version
+version-header: "&6&l=== 블랙잭 플러그인 버전 정보 ==="
+version-plugin: "&f플러그인: &aBlackjack"
+version-author: "&f제작자: &bDefectiveVortex"
+version-current: "&f현재 버전: &a%version%"
+version-latest: "&f최신 버전: &a%version%"
+version-github: "&7GitHub: &9https://github.com/DefectiveVortex/Blackjack"
+
+# Update notice shown to admins on join
+update-available-header: "&6&l블랙잭 플러그인 업데이트가 있습니다"
+update-available-current: "&f현재 버전: &c%version%"
+update-available-latest: "&f최신 버전: &a%version%"
+update-available-download: "&b내려받기: &9%url%"
+update-available-hint: "&7자세한 내용은 &f/bj version&7 을 쓰세요"
+update-check-failed: "&c업데이트를 확인하지 못했습니다. 인터넷 연결을 확인하세요."
+update-checking: "&e업데이트를 확인하는 중입니다..."
+update-outdated: "&c버전이 오래되었습니다. 현재 %current% | 최신 &a%latest%"
+update-up-to-date: "&a최신 버전입니다. 현재 버전 %version%"
+
+# Button configuration
+buttons:
+  # Game action buttons
+  hit:
+    text: "&a&l[히트]"
+    command: "/bj hit"
+    hover: "&e눌러서 카드 한 장 더 받기"
+  
+  stand:
+    text: "&c&l[스탠드]"
+    command: "/bj stand"
+    hover: "&e눌러서 차례 끝내기"
+  
+  double-down:
+    text: "&6&l[더블다운]"
+    command: "/bj doubledown"
+    hover: "&e눌러서 베팅을 두 배로 하고 카드 한 장 받기"
+  
+  # Post-game buttons
+  play-again:
+    text: "&a&l[다시 하기]"
+    command: "/bj start"
+    hover: "&e눌러서 새 게임 시작"
+  
+  leave-table:
+    text: "&c&l[테이블 떠나기]"
+    command: "/bj leave"
+    hover: "&e눌러서 테이블 떠나기"
+  
+  # Betting buttons
+  custom-bet:
+    text: "&b&l[금액 직접 입력]"
+    command: "/bj bet "
+    hover: "&e눌러서 금액을 직접 입력"
+  
+  # Bet amount colors
+  small-bet-color: "&a"    # Green for small bets
+  medium-bet-color: "&e"   # Yellow for medium bets  
+  large-bet-color: "&c"    # Red for large bets
+  huge-bet-color: "&d"     # Pink for huge bets
+
+# Game action prompts
+game-action-prompt: "&7차례: "
+game-action-separator: "&7 | "
+post-game-prompt: "&7선택: "

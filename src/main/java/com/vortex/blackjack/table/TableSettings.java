@@ -37,7 +37,9 @@ public class TableSettings {
     }
 
     public int getMaxPlayers(ConfigManager cfg) {
-        return maxPlayers != null ? maxPlayers : cfg.getMaxPlayers();
+        // Older configs may hold values up to 8; a table only ever has four chairs.
+        int value = maxPlayers != null ? maxPlayers : cfg.getMaxPlayers();
+        return Math.max(1, Math.min(ConfigManager.MAX_SEATS, value));
     }
 
     public double getMaxJoinDistance(ConfigManager cfg) {
@@ -67,16 +69,16 @@ public class TableSettings {
     // -------------------------------------------------------------------------
 
     /**
-     * Returns an error description if the current settings are invalid, or null if OK.
+     * Returns a (translated) error description if the current settings are invalid, or null if OK.
      */
     public String validate(ConfigManager cfg) {
         int lo = getMinBet(cfg);
         int hi = getMaxBet(cfg);
-        if (lo > hi) return "min-bet (" + lo + ") cannot exceed max-bet (" + hi + ")";
-        if (maxPlayers != null && (maxPlayers < 1 || maxPlayers > 8))
-            return "max-players must be between 1 and 8";
+        if (lo > hi) return cfg.formatMessage("table-error-min-exceeds-max", "min_bet", lo, "max_bet", hi);
+        if (maxPlayers != null && (maxPlayers < 1 || maxPlayers > ConfigManager.MAX_SEATS))
+            return cfg.formatMessage("table-error-max-players-range", "max", ConfigManager.MAX_SEATS);
         if (maxJoinDistance != null && maxJoinDistance < 1.0)
-            return "max-join-distance must be at least 1";
+            return cfg.getMessage("table-error-min-distance");
         return null;
     }
 
@@ -96,8 +98,7 @@ public class TableSettings {
             String tok   = tokens[i];
             int    colon = tok.indexOf(':');
             if (colon < 0) {
-                errorOut.append("Invalid argument '").append(tok)
-                        .append("' — expected format key:value");
+                errorOut.append(cfg.formatMessage("table-error-invalid-format", "arg", tok));
                 return null;
             }
             String key = tok.substring(0, colon).toLowerCase();
@@ -109,13 +110,12 @@ public class TableSettings {
                     case "max-players"        -> s.setMaxPlayers(parsePositiveInt(val));
                     case "max-join-distance"  -> s.setMaxJoinDistance(parsePositiveDouble(val));
                     default -> {
-                        errorOut.append("Unknown setting '").append(key)
-                                .append("'. Valid: min-bet, max-bet, max-players, max-join-distance");
+                        errorOut.append(cfg.formatMessage("table-error-unknown-setting", "setting", key));
                         return null;
                     }
                 }
             } catch (NumberFormatException e) {
-                errorOut.append("Invalid value for '").append(key).append("': ").append(val);
+                errorOut.append(cfg.formatMessage("table-error-invalid-value", "setting", key, "value", val));
                 return null;
             }
         }

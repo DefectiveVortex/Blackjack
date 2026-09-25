@@ -1,6 +1,7 @@
 package com.vortex.blackjack.util;
 
 import com.vortex.blackjack.BlackjackPlugin;
+import com.vortex.blackjack.config.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -100,16 +101,13 @@ public class VersionChecker {
         if (isOutdated) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 String downloadUrl = "https://github.com/" + gitHubRepo + "/releases/latest";
+                ConfigManager messages = plugin.getConfigManager();
                 
-                admin.sendMessage("§e╔═══════════════════════════════════════════════════════════════════════════╗");
-                admin.sendMessage("§e║ §6⚠ BLACKJACK PLUGIN UPDATE AVAILABLE§e                                  ║");
-                admin.sendMessage("§e║                                                                           ║");
-                admin.sendMessage("§e║ §fCurrent Version: §c" + currentVersion + "§e                                                  ║");
-                admin.sendMessage("§e║ §fLatest Version:  §a" + latestVersion + "§e                                                  ║");
-                admin.sendMessage("§e║                                                                           ║");
-                admin.sendMessage("§e║ §bDownload: §9" + downloadUrl + "§e     ║");
-                admin.sendMessage("§e║ §7Use §f/bj version§7 for more details§e                                  ║");
-                admin.sendMessage("§e╚═══════════════════════════════════════════════════════════════════════════╝");
+                admin.sendMessage(messages.getMessage("update-available-header"));
+                admin.sendMessage(messages.formatMessage("update-available-current", "version", currentVersion));
+                admin.sendMessage(messages.formatMessage("update-available-latest", "version", latestVersion));
+                admin.sendMessage(messages.formatMessage("update-available-download", "url", downloadUrl));
+                admin.sendMessage(messages.getMessage("update-available-hint"));
             }, 40L); // Delay 2 seconds after join
         }
     }
@@ -118,19 +116,21 @@ public class VersionChecker {
      * Get version status message for command
      */
     public String getVersionStatus() {
+        ConfigManager messages = plugin.getConfigManager();
         if (checkFailed) {
-            return "§cFailed to check for updates. Please check your internet connection.";
+            return messages.getMessage("update-check-failed");
         }
         
         if (latestVersion == null) {
-            return "§eChecking for updates...";
+            return messages.getMessage("update-checking");
         }
         
         if (isOutdated) {
             String downloadUrl = "https://github.com/" + gitHubRepo + "/releases/latest";
-            return "§cOutdated! Current: " + currentVersion + " | Latest: §a" + latestVersion + "§c\nDownload: §9" + downloadUrl;
+            return messages.formatMessage("update-outdated", "current", currentVersion, "latest", latestVersion)
+                + "\n" + messages.formatMessage("update-available-download", "url", downloadUrl);
         } else {
-            return "§aUp to date! Current version: " + currentVersion;
+            return messages.formatMessage("update-up-to-date", "version", currentVersion);
         }
     }
     

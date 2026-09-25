@@ -167,8 +167,11 @@ public class BlackjackPlaceholderExpansion extends PlaceholderExpansion {
         
         return switch (param) {
             case "at_table" -> table != null ? "true" : "false";
+            case "id" -> table != null ? String.valueOf(table.getId()) : "";
             case "players" -> table != null ? String.valueOf(table.getPlayerCount()) : "0";
-            case "max_players" -> String.valueOf(plugin.getConfigManager().getMaxPlayers());
+            case "max_players" -> String.valueOf(table != null
+                ? table.getSettings().getMaxPlayers(plugin.getConfigManager())
+                : plugin.getConfigManager().getMaxPlayers());
             case "seats_available" -> table != null ? String.valueOf(table.getAvailableSeats()) : "0";
             case "is_full" -> table != null ? (table.isFull() ? "true" : "false") : "false";
             case "game_in_progress" -> table != null ? (table.isGameInProgress() ? "true" : "false") : "false";
@@ -216,10 +219,10 @@ public class BlackjackPlaceholderExpansion extends PlaceholderExpansion {
         
         return switch (param) {
             case "current" -> currentBet != null ? String.valueOf(currentBet) : "0";
-            case "current_formatted" -> currentBet != null ? formatMoney(currentBet) : "$0";
+            case "current_formatted" -> formatMoney(currentBet != null ? currentBet : 0);
             case "has_bet" -> currentBet != null && currentBet > 0 ? "true" : "false";
             case "persistent" -> persistentBet != null ? String.valueOf(persistentBet) : "0";
-            case "persistent_formatted" -> persistentBet != null ? formatMoney(persistentBet) : "$0";
+            case "persistent_formatted" -> formatMoney(persistentBet != null ? persistentBet : 0);
             case "has_persistent" -> persistentBet != null && persistentBet > 0 ? "true" : "false";
             case "min_bet" -> String.valueOf(plugin.getConfigManager().getMinBet());
             case "max_bet" -> String.valueOf(plugin.getConfigManager().getMaxBet());
@@ -263,12 +266,14 @@ public class BlackjackPlaceholderExpansion extends PlaceholderExpansion {
      * Format money values with appropriate suffixes
      */
     private String formatMoney(double amount) {
+        String number;
         if (amount >= 1_000_000) {
-            return "$" + decimalFormat.format(amount / 1_000_000) + "M";
+            number = decimalFormat.format(amount / 1_000_000) + "M";
         } else if (amount >= 1_000) {
-            return "$" + decimalFormat.format(amount / 1_000) + "K";
+            number = decimalFormat.format(amount / 1_000) + "K";
         } else {
-            return "$" + decimalFormat.format(amount);
+            number = decimalFormat.format(amount);
         }
+        return plugin.getConfigManager().formatCurrency(number);
     }
 }

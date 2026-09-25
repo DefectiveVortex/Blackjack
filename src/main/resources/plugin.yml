@@ -1,8 +1,8 @@
 name: Blackjack
-version: 2.4
+version: ${project.version}
 main: com.vortex.blackjack.BlackjackPlugin
 description: A physical blackjack table game for Minecraft
-api-version: 1.21
+api-version: "1.20"
 depend: [Vault]
 softdepend: [GSit, PlaceholderAPI]
 loadbefore: []
@@ -15,16 +15,18 @@ commands:
       &8[&6Blackjack&8] &rAvailable Commands:
       &e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Create a table
       &e/bj settable <setting> <value> &7- Modify nearest table settings
-      &e/bj removetable &7- Remove the nearest table
+      &e/bj removetable [id] &7- Remove the nearest table, or one by ID
+      &e/bj tables &7- List all tables with their IDs
       &e/bj join &7- Join the nearest table
       &e/bj leave &7- Leave your current table
       &e/bj start &7- Start a new game
       &e/bj hit &7- Take another card
       &e/bj stand &7- End your turn
       &e/bj doubledown &7- Double your bet and take exactly one more card
-      &e/bj bet <amount> &7- Place or change your bet
+      &e/bj bet [amount] &7- Place or change your bet (no amount opens the chip menu)
       &e/bj stats [player] &7- View statistics (admins can check other players)
       &e/bj version &7- Check the plugin version and update status
+      &e/bj cleanup [radius] &7- Remove leftover card displays nearby
     aliases: [bj]
 
 permissions:

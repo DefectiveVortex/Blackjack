@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": "thirdperson_lefthand",
+        "model": {
+          "type": "minecraft:model",
+          "model": "playing_cards:item/card/back"
+        }
+      },
+      {
+        "when": "thirdperson_righthand",
+        "model": {
+          "type": "minecraft:model",
+          "model": "playing_cards:item/card/back"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "playing_cards:item/card/back"
+    }
+  }
+} 

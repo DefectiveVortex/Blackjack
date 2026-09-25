@@ -1,2 +1,4 @@
 target/
 .claude/
+test-server/
+dependency-reduced-pom.xml

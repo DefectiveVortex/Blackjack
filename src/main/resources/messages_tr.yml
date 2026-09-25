@@ -1,0 +1,279 @@
+# Blackjack messages: Turkish (Türkçe)
+# Use it by setting `language: tr` in config.yml. Keys missing here fall back to English.
+# Translated by al2wastaken (https://github.com/al2wastaken/Blackjack).
+# Colour codes: &0-&9, &a-&f, &l bold, &n underline, &o italic, &r reset. %placeholders% are filled in by the plugin.
+
+# Core messages
+prefix: "&8[&6Blackjack&8] &r"
+no-permission: "&cBu işlemi yapmak için yetkiniz yok!"
+player-only-command: "&cBu komut yalnızca oyuncular tarafından kullanılabilir!"
+
+# Table management
+table-created: "&aBlackjack masası oluşturuldu!"
+table-created-with-settings: "&aMasa #%id% oluşturuldu! &7(min: &e%min_bet%&7, maks: &e%max_bet%&7, oyuncular: &e%max_players%&7, mesafe: &e%max_join_distance%&7)"
+createtable-invalid-arg: "&cGeçersiz argüman: %error%"
+table-removed: "&cBlackjack masası kaldırıldı!"
+table-already-exists: "&cBu konumda zaten bir masa var!"
+table-remove-failed: "&cMasa kaldırılamadı!"
+no-table-nearby: "&cYakında masa bulunamadı!"
+table-not-found-id: "&c%id% ID'li bir masa yok."
+tables-header: "&6Blackjack masaları (%count%):"
+tables-entry: "&e#%id% &7%world% %x%, %y%, %z% &8| &f%players%/%max_players% oyuncu"
+tables-none: "&7Henüz hiç blackjack masası yok."
+settable-usage: "&eKullanım: /bj settable <ayar> <değer>"
+settable-unknown-setting: "&cBilinmeyen ayar '%setting%'. Geçerli ayarlar: min-bet, max-bet, max-players, max-join-distance"
+settable-invalid-value: "&cGeçersiz değer: '%value%'"
+settable-validation-error: "&cDoğrulama başarısız: %error%"
+settable-updated: "&aEn yakın masadaki &e%setting% &aayarı &e%value% &aolarak güncellendi."
+
+# Table setting errors (inserted into createtable-invalid-arg and settable-validation-error)
+table-error-min-exceeds-max: "min-bet (%min_bet%), max-bet (%max_bet%) değerinden büyük olamaz"
+table-error-max-players-range: "max-players 1 ile %max% arasında olmalıdır"
+table-error-min-distance: "max-join-distance en az 1 olmalıdır"
+table-error-invalid-format: "Geçersiz argüman '%arg%' — beklenen biçim: ayar:değer"
+table-error-unknown-setting: "Bilinmeyen ayar '%setting%'. Geçerli ayarlar: min-bet, max-bet, max-players, max-join-distance"
+table-error-invalid-value: "Geçersiz değer '%setting%': %value%"
+
+# Card cleanup (/bj cleanup)
+cleanup-usage: "&cKullanım: /bj cleanup [yarıçap]"
+cleanup-done: "&a%radius% blok içinde kalan %count% kart temizlendi."
+cleanup-none: "&7%radius% blok içinde kalan kart yok."
+
+# Player table status
+already-at-table: "&cZaten bir masadasınız! Mevcut masadan ayrılmak için /bj leave kullanın."
+not-at-table: "&cBir masada değilsiniz! Oynamak için bir masanın yakınında /bj join yazın."
+auto-left-table: "&eMasadan çok uzaklaştığınız için masadan otomatik olarak çıkarıldınız."
+auto-left-inactive: "&eDiğer oyuncuların oynayabilmesi için hareketsizlik nedeniyle masadan çıkarıldınız."
+left-table: "&aMasadan ayrıldınız."
+left-table-bet-refunded: "&aMasadan ayrıldınız ve $%amount% tutarındaki bahsiniz iade edildi."
+left-table-bet-forfeit: "&cOyun devam ederken ayrıldığınız için $%amount% tutarındaki bahsiniz yandı."
+
+# Seats (table.seat-players): sneaking stands you up
+seat-hint: "&7Masadan kalkıp ayrılmak için eğilin (Shift)."
+seat-leave-confirm-refund: "&eAyrılmak için 3 saniye içinde tekrar eğilin. Eliniz hâlâ oyunda olduğu için $%amount% bahsiniz iade edilecek."
+seat-leave-confirm-forfeit: "&eAyrılmak için 3 saniye içinde tekrar eğilin. Eliniz zaten sonuçlandığı için $%amount% bahsiniz yanacak."
+
+# Leave reasons (fill %reason% in player-left-table and player-left-during-turn)
+leave-reason-left: "masadan ayrıldı"
+leave-reason-disconnected: "sunucudan ayrıldı"
+leave-reason-too-far: "masadan çok uzaklaştı"
+leave-reason-inactive: "hareketsizlik nedeniyle çıkarıldı"
+
+# Table joining
+table-full: "&cBu masa dolu!"
+too-far: "&cKatılmak için masaya çok uzaksınız!"
+join-insufficient-funds: "&cBu masaya oturmak için en az $%min_bet% gerekiyor."
+no-seats: "&cUygun boş sandalye yok!"
+join-error: "&cMasaya katılırken bir hata oluştu. Lütfen tekrar deneyin."
+game-in-progress: "&cAktif bir oyun sırasında bu işlem yapılamaz!"
+
+# Betting
+bet-required: "&cOyunun başlayabilmesi için önce bahis koymalısınız! Kullanım: /bj bet <miktar>"
+invalid-bet: "&cGeçersiz bahis miktarı! %min_bet% ile %max_bet% arasında olmalıdır."
+insufficient-funds: "&c$%amount% tutarında bahis koymak için yeterli paranız yok!"
+bet-cooldown: "&cBahsinizi tekrar değiştirmeden önce lütfen biraz bekleyin."
+bet-set: "&aBahsiniz $%amount% olarak ayarlandı!"
+bet-already-set: "&eBahsiniz zaten $%amount%!"
+betting-locked: "&cMevcut el oynanırken veya sonuçlanırken bahisler kilitlidir."
+bet-refunded: "&a$%amount% tutarındaki bahsiniz iade edildi."
+bet-refunded-shutdown: "&aSunucu kapanması nedeniyle bahis iade edildi: $%amount%"
+bet-reduced-refunded: "&aBahis $%amount% tutarına düşürüldü ve $%refund% iade edildi!"
+auto-bet-placed: "&aOtomatik bahis yapıldı: $%amount%"
+invalid-amount: "&cGeçersiz miktar!"
+bet-usage: "&cKullanım: /bj bet <miktar>"
+bet-failed: "&cBahis işlemi gerçekleştirilemedi!"
+bet-refund-failed: "&cBahis iadesi gerçekleştirilemedi!"
+error-refund: "&cBahis iadesi yapılırken bir hata oluştu. Lütfen bir yetkiliye danışın!"
+error-payout: "&cKazanç ödemesi yapılırken bir hata oluştu. Lütfen bir yetkiliye danışın!"
+
+# Quick bet menu
+quick-bet-header: "&6&l=== Hızlı Bahis Menüsü ==="
+quick-bet-description: "&7Bahis yapmak için bir miktara tıklayın:"
+quick-bet-border: "&e&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+quick-bet-title: "&6&l                         HIZLI BAHİS"
+
+# Betting category labels
+betting-category-small: "&7Düşük: "
+betting-category-medium: "&7Orta: "
+betting-category-large: "&7Yüksek: "
+quick-bet-hover: "&e$%amount% bahis yapmak için tıklayın"
+
+# Chip menu (betting.menu: gui, also /bj bet with no amount)
+bet-menu-title: "&8Kumarhane Bahis Menüsü"
+bet-menu-info-name: "&6&lBahsiniz"
+bet-menu-info-balance: "&7Bakiyeniz: &f%balance%"
+bet-menu-info-bet: "&7Şu anki bahsiniz: &f%bet%"
+bet-menu-info-limits: "&7Masa limitleri: &f%min_bet% &7- &f%max_bet%"
+bet-menu-chip-lore: "&eTıkla: Bahis olarak %amount% yatır"
+bet-menu-chip-too-low: "&cBu masanın minimumunun altında"
+bet-menu-chip-too-high: "&cBu masanın maksimumunun üstünde"
+bet-menu-chip-unaffordable: "&cBunu karşılayacak bakiyeniz yok"
+bet-menu-custom-name: "&b&lÖzel Bahis"
+bet-menu-custom-lore: "&7İstediğiniz miktarı sohbete yazın"
+bet-menu-close: "&cKapat"
+bet-custom-prompt: "&eBahsinizi sohbete yazın ya da vazgeçmek için &fiptal&e yazın."
+bet-custom-cancelled: "&7Bahis iptal edildi."
+# Also accepted to cancel, besides "cancel"
+bet-custom-cancel-word: "iptal"
+
+# How amounts are written on quick bet buttons and in PlaceholderAPI *_formatted values
+currency-format: "$%amount%"
+
+# Game flow
+your-turn: "&aSıra sizde!"
+hand-value: "&aElinizin değeri: %value%"
+dealer-card: "&aKasanın görünen kartı: %card% | Değer: %value%"
+dealer-value: "&aKasanın son el değeri: %value%"
+
+# Game actions
+player-busts: "&c%player% battı (21'i aştı)!"
+player-stands: "&a%player% %value% değerinde pas dedi!"
+player-pushes: "&e%player% berabere kaldı ve $%amount% bahsini geri aldı!"
+
+# Double down
+double-down-first-two-cards: "&cYalnızca ilk iki kartınız varken ikiye katlayabilirsiniz!"
+double-down-already-used: "&cZaten bahsinizi ikiye katladınız!"
+double-down-insufficient-funds: "&cBahsi ikiye katlamak için yeterli paranız yok!"
+
+# Hand display
+hand-display: "&bEl: %hand% | %hand_value%"
+dealer-shows: "&aKasanın açık kartı: %card% | %value%"
+dealer-final-hand: "&fKasa: %hand% | %value%"
+# The value part of a hand; colour and bold are added by the plugin (gold for 21, red for bust)
+hand-value-format: "Değer: %value%"
+
+# Statistics
+stats-header: "&6=== Blackjack İstatistikleri ==="
+stats-other-player-header: "&6=== %player% Blackjack İstatistikleri ==="
+stats-hands-won: "&eKazanılan Eller: &a%value%"
+stats-hands-lost: "&eKaybedilen Eller: &c%value%"
+stats-hands-pushed: "&eBerabere Bitenler: &7%value%"
+stats-blackjacks: "&eBlackjack Sayısı: &6%value%"
+stats-busts: "&eBatışlar: &c%value%"
+stats-win-rate: "&eKazanma Oranı: &a%%value%"
+stats-current-streak: "&eMevcut Seri: &b%value%"
+stats-best-streak: "&eEn İyi Seri: &a%value%"
+stats-total-winnings: "&eToplam Kazanç: &2$%value%"
+stats-no-permission: "&cDiğer oyuncuların istatistiklerini kontrol etmek için yetkiniz yok!"
+stats-player-not-found: "&cOyuncu bulunamadı: %player%"
+stats-none-found: "&cİstatistik bulunamadı!"
+stats-none-found-player: "&c%player% için istatistik bulunamadı!"
+
+# Configuration
+config-reloaded: "&aYapılandırma yeniden yüklendi!"
+
+# Help command
+help-header: "&rKullanılabilir Komutlar:"
+help-admin-create: "&e/bj createtable [min-bet:<n>] [max-bet:<n>] [max-players:<n>] [max-join-distance:<n>] &7- Blackjack masası oluşturur"
+help-admin-settable: "&e/bj settable <ayar> <değer> &7- En yakın masanın ayarlarını değiştirir"
+help-admin-remove: "&e/bj removetable [id] &7- En yakın masayı ya da ID'si verilen masayı kaldırır"
+help-admin-tables: "&e/bj tables &7- Tüm masaları ID'leriyle listeler"
+help-admin-reload: "&e/bj reload &7- Yapılandırmayı yeniden yükler"
+help-admin-version: "&e/bj version &7- Eklenti sürümünü ve durumunu kontrol eder"
+help-admin-cleanup: "&e/bj cleanup [yarıçap] &7- Yakında kalan kartları temizler"
+help-join: "&e/bj join &7- En yakın masaya katılır"
+help-leave: "&e/bj leave &7- Mevcut masadan ayrılır"
+help-bet: "&e/bj bet [miktar] &7- Bahis koyar veya bahsi değiştirir (miktar yazılmazsa çip menüsü açılır)"
+help-start: "&e/bj start &7- Yeni bir oyun başlatır"
+help-hit: "&e/bj hit &7- Bir kart daha çeker"
+help-stand: "&e/bj stand &7- Sıranızı bitirir (pas)"
+help-doubledown: "&e/bj doubledown &7- Bahsinizi ikiye katlar ve yalnızca bir kart daha çeker"
+help-stats: "&e/bj stats &7- İstatistiklerinizi görüntüler"
+help-stats-others: "&e/bj stats <oyuncu> &7- Başka bir oyuncunun istatistiklerini görüntüler"
+
+# Table broadcast messages
+table-message-broadcast: "&e%message%"
+player-left-during-turn: "&c%player% sırası kendisine geldiğinde %reason%."
+player-left-table: "&c%player% %reason%."
+
+# Game status messages
+player-joined-table: "&a%player% masaya katıldı!"
+game-started: "&aOyun başladı! Sıra &b%player%&a'de"
+game-ended: "&aOyun sona erdi!"
+player-turn: "&b%player%&f'nin sırası"
+# Turn timer (game.turn-timeout-seconds): countdown above the hotbar, then an automatic stand
+turn-timer: "&eSıra sizde &7- &f%seconds% sn &7içinde kart çekin veya pas deyin"
+turn-timeout: "&e%player% &7hamle süresini doldurdu; eli pas geçildi."
+player-hits-21: "%player% &621'e ulaştı!&r"
+player-doubles-down: "%player% &6İKİYE KATLADI&r (%value%)"
+
+# Game result messages  
+player-blackjack: "&6&l%player% BLACKJACK! &a+$%payout%"
+player-wins: "&a&l%player% KAZANDI! &a+$%payout%"
+player-loses: "&c&l%player% kaybetti -$%amount%"
+player-push: "&e&l%player% BERABERE - $%amount% iade edildi"
+
+# Balance display
+balance-display: "&aBakiyeniz: &6%balance%%currency% &a| Mevcut bahis: &6%current-bet%%currency%"
+
+# Hardcoded game error messages (for consistent display)
+game-error-no-players: "&cOyuncu olmadan oyun başlatılamaz!"
+game-error-all-must-bet: "&cOyunu başlatmadan önce tüm oyuncular bahis koymalıdır!"
+
+# Shown by the client when it's offered the card resource pack
+resource-pack-prompt: "&6Blackjack&7, masadaki kartları göstermek için &fPlaying Cards &7kaynak paketini kullanır."
+
+# /bj version
+version-header: "&6&l▬▬▬ BLACKJACK EKLENTİ SÜRÜM BİLGİSİ ▬▬▬"
+version-plugin: "&fEklenti: &aBlackjack"
+version-author: "&fGeliştirici: &bDefectiveVortex"
+version-current: "&fMevcut Sürüm: &a%version%"
+version-latest: "&fEn Son Sürüm: &a%version%"
+version-github: "&7GitHub: &9https://github.com/DefectiveVortex/Blackjack"
+
+# Update notice shown to admins on join
+update-available-header: "&6&l⚠ Blackjack eklentisi için güncelleme mevcut"
+update-available-current: "&fMevcut sürüm: &c%version%"
+update-available-latest: "&fEn son sürüm: &a%version%"
+update-available-download: "&bİndir: &9%url%"
+update-available-hint: "&7Ayrıntılar için &f/bj version &7yazın"
+update-check-failed: "&cGüncellemeler kontrol edilemedi. Lütfen internet bağlantınızı kontrol edin."
+update-checking: "&eGüncellemeler kontrol ediliyor..."
+update-outdated: "&cEski sürüm! Mevcut: %current% | En Son: &a%latest%"
+update-up-to-date: "&aEklenti güncel! Mevcut sürüm: %version%"
+
+# Button configuration
+buttons:
+  # Game action buttons
+  hit:
+    text: "&a&l[KART ÇEK]"
+    command: "/bj hit"
+    hover: "&eBir kart daha çekmek için tıklayın"
+  
+  stand:
+    text: "&c&l[PAS]"
+    command: "/bj stand"
+    hover: "&eSıranızı bitirmek için tıklayın"
+  
+  double-down:
+    text: "&6&l[İKİYE KATLA]"
+    command: "/bj doubledown"
+    hover: "&eBahsinizi ikiye katlayıp tek bir kart çekmek için tıklayın"
+  
+  # Post-game buttons
+  play-again:
+    text: "&a&l[Tekrar Oyna]"
+    command: "/bj start"
+    hover: "&eYeni bir oyun başlatmak için tıklayın"
+  
+  leave-table:
+    text: "&c&l[Masadan Ayrıl]"
+    command: "/bj leave"
+    hover: "&eMasadan ayrılmak için tıklayın"
+  
+  # Betting buttons
+  custom-bet:
+    text: "&b&l[ÖZEL BAHİS]"
+    command: "/bj bet "
+    hover: "&eÖzel bir miktar girmek için tıklayın"
+  
+  # Bet amount colors
+  small-bet-color: "&a"    # Green for small bets
+  medium-bet-color: "&e"   # Yellow for medium bets  
+  large-bet-color: "&c"    # Red for large bets
+  huge-bet-color: "&d"     # Pink for huge bets
+
+# Game action prompts
+game-action-prompt: "&7Hamleniz: "
+game-action-separator: "&7 | "
+post-game-prompt: "&7Seçim: "

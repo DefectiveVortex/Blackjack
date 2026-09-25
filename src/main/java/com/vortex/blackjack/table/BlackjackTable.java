@@ -6,17 +6,20 @@ import com.vortex.blackjack.game.BlackjackEngine;
 import com.vortex.blackjack.model.Card;
 import com.vortex.blackjack.model.Deck;
 import com.vortex.blackjack.util.ChatUtils;
+import com.vortex.blackjack.util.ServerCompat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
@@ -40,6 +43,7 @@ public class BlackjackTable {
     private final ConfigManager configManager;
     private final ChatUtils chatUtils;
     private final BlackjackEngine gameEngine;
+    private final int id;
     private final Location centerLoc;
     private final TableSettings settings;
     
@@ -64,18 +68,32 @@ public class BlackjackTable {
     // Auto-leave tracking
     private final Map<Player, Long> gameEndTimes = new ConcurrentHashMap<>();
     private BukkitTask autoLeaveTask;
+
+    // Seats: invisible armor stands players ride while at the table
+    public static final String SEAT_TAG = "blackjack-seat";
+    private final Map<Player, ArmorStand> seatEntities = new ConcurrentHashMap<>();
+    // When a player sneaked to leave mid-round and still has to confirm
+    private final Map<UUID, Long> pendingLeaves = new ConcurrentHashMap<>();
+
+    // Turn timer
+    private BukkitTask turnTimerTask;
     
     public BlackjackTable(BlackjackPlugin plugin, TableManager tableManager,
-                          ConfigManager configManager, Location centerLoc,
+                          ConfigManager configManager, int id, Location centerLoc,
                           TableSettings settings) {
         this.plugin = plugin;
         this.tableManager = tableManager;
         this.configManager = configManager;
         this.chatUtils = new ChatUtils(configManager);
         this.gameEngine = new BlackjackEngine();
+        this.id = id;
         this.centerLoc = centerLoc;
         this.settings = settings;
         purgeTrackedDisplays();
+    }
+
+    public int getId() {
+        return id;
     }
 
     public TableSettings getSettings() {
@@ -83,9 +101,16 @@ public class BlackjackTable {
     }
     
     /**
-     * Add a player to this table
+     * Add a player to this table at the next free seat
      */
     public boolean addPlayer(Player player) {
+        return addPlayer(player, -1);
+    }
+
+    /**
+     * Add a player to this table, at {@code preferredSeat} if it's free (e.g. the chair they clicked).
+     */
+    public boolean addPlayer(Player player, int preferredSeat) {
         synchronized (this) {
             if (players.contains(player)) {
                 player.sendMessage(configManager.getMessage("already-at-table"));
@@ -112,12 +137,20 @@ public class BlackjackTable {
                 return false;
             }
             
-            if (player.getLocation().distance(centerLoc) > settings.getMaxJoinDistance(configManager)) {
+            if (!player.getWorld().equals(centerLoc.getWorld())
+                    || player.getLocation().distance(centerLoc) > settings.getMaxJoinDistance(configManager)) {
                 player.sendMessage(configManager.getMessage("too-far"));
                 return false;
             }
+
+            // Don't let someone take a seat they can't afford to play from
+            int tableMinBet = settings.getMinBet(configManager);
+            if (!plugin.getEconomyProvider().hasEnough(player.getUniqueId(), BigDecimal.valueOf(tableMinBet))) {
+                player.sendMessage(configManager.formatMessage("join-insufficient-funds", "min_bet", tableMinBet));
+                return false;
+            }
             
-            int seatNumber = getNextAvailableSeatNumber();
+            int seatNumber = isSeatFree(preferredSeat) ? preferredSeat : getNextAvailableSeatNumber();
             if (seatNumber == -1) {
                 player.sendMessage(configManager.getMessage("no-seats"));
                 return false;
@@ -130,21 +163,19 @@ public class BlackjackTable {
                 playerHands.put(player, new ArrayList<>());
                 playerCardDisplays.put(player, new ArrayList<>());
                 playerDealerDisplays.put(player, new ArrayList<>());
-                tableManager.setPlayerTable(player, this);
-                
-                // Teleport to seat
+
+                // Teleport to seat. The table is registered afterwards on purpose: the teleport
+                // listener removes seated players who teleport out of range, and it must not see this one.
                 Location seatLoc = getSeatLocation(seatNumber);
                 if (seatLoc != null) {
+                    seatLoc.setYaw(seatYaw(seatNumber));
+                    seatLoc.setPitch(20f); // looking at the cards
                     player.teleport(seatLoc);
                     
-                    // Rotate player 90 degrees to the right before sitting
-                    Location currentLoc = player.getLocation();
-                    float newYaw = currentLoc.getYaw() + 90f;
-                    currentLoc.setYaw(newYaw);
-                    player.teleport(currentLoc);
-                    
-                    // GSit integration - make player sit down if GSit is available
-                    if (plugin.isGSitEnabled()) {
+                    if (configManager.shouldSeatPlayers()) {
+                        sitDown(player, seatNumber);
+                    } else if (plugin.isGSitEnabled()) {
+                        // GSit integration - make player sit down if GSit is available
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             if (player.isOnline() && players.contains(player)) {
                                 // Use GSit's sit command
@@ -153,17 +184,25 @@ public class BlackjackTable {
                         }, 5L); // 0.25 second delay to allow teleport to complete
                     }
                 }
-                
+                tableManager.setPlayerTable(player, this);
+
                 broadcastTableMessage(configManager.formatMessage("player-joined-table", "player", player.getName()));
+                if (configManager.shouldSeatPlayers()) {
+                    player.sendMessage(configManager.getMessage("seat-hint"));
+                }
+                plugin.getCardResourcePack().offer(player);
                 
-                // Show betting options if UX features enabled
-                if (configManager.areParticlesEnabled()) { // Using as UX enabled check
+                // Let them pick a bet: chip menu, or the clickable amounts in chat
+                if (configManager.useBetMenu()) {
+                    plugin.getBetMenu().open(player);
+                } else {
                     chatUtils.sendBettingOptions(player);
                 }
                 
                 return true;
             } catch (Exception e) {
                 // Cleanup on error
+                standUp(player);
                 players.remove(player);
                 playerSeats.remove(player);
                 playerHands.remove(player);
@@ -182,7 +221,7 @@ public class BlackjackTable {
      * Remove a player from this table
      */
     public void removePlayer(Player player) {
-        removePlayer(player, "left the table");
+        removePlayer(player, configManager.getMessage("leave-reason-left"));
     }
     
     /**
@@ -191,36 +230,46 @@ public class BlackjackTable {
     public void removePlayer(Player player, String reason) {
         synchronized (this) {
             if (!players.contains(player)) return;
-            
-            // Check if player has a bet that needs to be refunded
-            boolean shouldRefundBet = gameInProgress && configManager.shouldRefundOnLeave();
+
             Integer betAmount = plugin.getPlayerBets().get(player);
-            
+            boolean hasBet = betAmount != null && betAmount > 0;
+            boolean inRound = roundBets.containsKey(player);
+            // A hand that has stood, doubled or busted is already decided. Refunding it would let
+            // a player walk away from a known loss, so only a hand still being played is refundable.
+            boolean handStillLive = !finishedPlayers.contains(player) && !isPlayerBusted(player);
+
+            if (settlingResults && inRound) {
+                // The dealer is done and payouts are only waiting on the reveal delay: settle now,
+                // before the hand is cleared, so leaving can neither dodge nor lose the result.
+                handlePayout(player, gameEngine.calculateHandValue(dealerHand));
+                roundBets.remove(player);
+                player.sendMessage(configManager.getMessage("left-table"));
+            } else if (gameInProgress && inRound && hasBet) {
+                plugin.getPlayerBets().remove(player);
+                roundBets.remove(player);
+                if (handStillLive && configManager.shouldRefundOnLeave()) {
+                    refundLeavingPlayer(player, betAmount);
+                } else {
+                    player.sendMessage(configManager.formatMessage("left-table-bet-forfeit", "amount", betAmount));
+                }
+            } else if (hasBet) {
+                // Bet placed for a round that never started; nothing was at stake yet.
+                plugin.getPlayerBets().remove(player);
+                refundLeavingPlayer(player, betAmount);
+            } else {
+                player.sendMessage(configManager.getMessage("left-table"));
+            }
+
             // Cleanup player data
+            standUp(player);
+            pendingLeaves.remove(player.getUniqueId());
             players.remove(player);
             playerSeats.remove(player);
             playerHands.remove(player);
             finishedPlayers.remove(player);
             doubleDownPlayers.remove(player);
             tableManager.setPlayerTable(player, null);
-            
-            // Refund bet if player leaves mid-game and refunds are enabled
-            if (shouldRefundBet && betAmount != null && betAmount > 0) {
-                plugin.getPlayerBets().remove(player);
-                if (plugin.getEconomyProvider().add(player.getUniqueId(), BigDecimal.valueOf(betAmount))) {
-                    player.sendMessage(configManager.formatMessage("left-table-bet-refunded", "amount", betAmount));
-                } else {
-                    player.sendMessage(configManager.getMessage("error-refund"));
-                    plugin.getLogger().severe("Failed to refund bet for " + player.getName() + " when leaving mid-game");
-                }
-            } else if (gameInProgress && betAmount != null && betAmount > 0) {
-                // Player left mid-game but refunds are disabled - remove bet without refunding
-                plugin.getPlayerBets().remove(player);
-                player.sendMessage(configManager.formatMessage("left-table-bet-forfeit", "amount", betAmount));
-            } else {
-                player.sendMessage(configManager.getMessage("left-table"));
-            }
-            
+
             // Remove display entities
             List<ItemDisplay> cardDisplays = playerCardDisplays.remove(player);
             if (cardDisplays != null) {
@@ -248,6 +297,15 @@ public class BlackjackTable {
         }
     }
     
+    private void refundLeavingPlayer(Player player, int amount) {
+        if (plugin.getEconomyProvider().add(player.getUniqueId(), BigDecimal.valueOf(amount))) {
+            player.sendMessage(configManager.formatMessage("left-table-bet-refunded", "amount", amount));
+        } else {
+            player.sendMessage(configManager.getMessage("error-refund"));
+            plugin.getLogger().severe("Failed to refund bet of " + amount + " for " + player.getName() + " when leaving the table");
+        }
+    }
+
     /**
      * Remove all players from the table
      */
@@ -325,6 +383,7 @@ public class BlackjackTable {
             
             // Send interactive turn message (doubledown available on first turn)
             chatUtils.sendGameActionBar(currentPlayer, true);
+            startTurnTimer();
         }
     }
     
@@ -415,9 +474,14 @@ public class BlackjackTable {
                 return;
             }
             
-            // Double the bet
-            plugin.getEconomyProvider().subtract(player.getUniqueId(), java.math.BigDecimal.valueOf(currentBet));
+            // Double the bet. Payouts read roundBets, so it has to be doubled too or a winning
+            // double down only pays back the original stake.
+            if (!plugin.getEconomyProvider().subtract(player.getUniqueId(), java.math.BigDecimal.valueOf(currentBet))) {
+                player.sendMessage(configManager.getMessage("bet-failed"));
+                return;
+            }
             plugin.getPlayerBets().put(player, currentBet * 2);
+            roundBets.put(player, currentBet * 2);
             
             // Mark player as doubled down
             doubleDownPlayers.add(player);
@@ -432,7 +496,7 @@ public class BlackjackTable {
             int value = gameEngine.calculateHandValue(hand);
             broadcastTableMessage(configManager.formatMessage("player-doubles-down", 
                 "player", player.getName(), 
-                "value", formatHandValue(value)));
+                "value", formatHandValue(value)), true);
             
             // Player is automatically done after double down
             finishedPlayers.add(player);
@@ -476,14 +540,52 @@ public class BlackjackTable {
             List<Card> hand = playerHands.get(currentPlayer);
             boolean canDoubleDown = hand != null && hand.size() == 2 && !doubleDownPlayers.contains(currentPlayer);
             chatUtils.sendGameActionBar(currentPlayer, canDoubleDown);
+            startTurnTimer();
         } else {
             endGame();
+        }
+    }
+
+    /**
+     * Give the current player turn-timeout-seconds to act, counting down on their action bar,
+     * then stand for them. Without it one idle player holds up the whole table until they leave.
+     */
+    private void startTurnTimer() {
+        cancelTurnTimer();
+        int timeout = configManager.getTurnTimeoutSeconds();
+        Player turnPlayer = currentPlayer;
+        if (timeout <= 0 || turnPlayer == null) {
+            return;
+        }
+
+        int[] secondsLeft = {timeout};
+        turnTimerTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (!gameInProgress || currentPlayer != turnPlayer) {
+                cancelTurnTimer();
+                return;
+            }
+            if (secondsLeft[0] <= 0) {
+                cancelTurnTimer();
+                broadcastTableMessage(configManager.formatMessage("turn-timeout", "player", turnPlayer.getName()), true);
+                stand(turnPlayer);
+                return;
+            }
+            chatUtils.sendActionBar(turnPlayer, configManager.formatMessage("turn-timer", "seconds", secondsLeft[0]));
+            secondsLeft[0]--;
+        }, 0L, 20L);
+    }
+
+    private void cancelTurnTimer() {
+        if (turnTimerTask != null) {
+            turnTimerTask.cancel();
+            turnTimerTask = null;
         }
     }
     
     private void endGame() {
         synchronized (this) {
             if (!gameInProgress) return;
+            cancelTurnTimer();
             
             // Dealer logic
             boolean anyValidPlayers = players.stream()
@@ -504,9 +606,11 @@ public class BlackjackTable {
             int dealerValue = gameEngine.calculateHandValue(dealerHand);
             String dealerHandDisplay = formatHand(dealerHand);
             String dealerValueDisplay = formatHandValue(dealerValue);
-            broadcastTableMessage("Dealer: " + dealerHandDisplay + " | " + dealerValueDisplay);
+            broadcastTableMessage(configManager.formatMessage("dealer-final-hand",
+                "hand", dealerHandDisplay, "value", dealerValueDisplay), true);
             
-            // Handle payouts for each player with a small delay to let dealer cards show
+            // Handle payouts for each player with a small delay to let dealer cards show.
+            // Anyone offline by then is settled inside removePlayer.
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 for (Player player : new ArrayList<>(players)) {
                     if (player.isOnline()) {
@@ -557,9 +661,10 @@ public class BlackjackTable {
                 plugin.getEconomyProvider().add(player.getUniqueId(), java.math.BigDecimal.valueOf(blackjackPayout));
                 broadcastTableMessage(configManager.formatMessage("player-blackjack", 
                     "player", player.getName(), 
-                    "payout", String.valueOf(blackjackPayout)));
+                    "payout", String.valueOf(blackjackPayout)), true);
                 playWinSound(player);
-                updatePlayerStats(player, true, (double) blackjackPayout);
+                // Record profit, not the returned stake, to match regular wins
+                updatePlayerStats(player, true, (double) (blackjackPayout - betAmount));
                 break;
             case PLAYER_WIN:
             case DEALER_BUST:
@@ -568,7 +673,7 @@ public class BlackjackTable {
                 plugin.getEconomyProvider().add(player.getUniqueId(), java.math.BigDecimal.valueOf(winPayout));
                 broadcastTableMessage(configManager.formatMessage("player-wins", 
                     "player", player.getName(), 
-                    "payout", String.valueOf(winPayout)));
+                    "payout", String.valueOf(winPayout)), true);
                 playWinSound(player);
                 updatePlayerStats(player, true, (double) betAmount);
                 break;
@@ -578,7 +683,7 @@ public class BlackjackTable {
                 // Player loses their bet (already taken when bet was placed)
                 broadcastTableMessage(configManager.formatMessage("player-loses", 
                     "player", player.getName(), 
-                    "amount", String.valueOf(betAmount)));
+                    "amount", String.valueOf(betAmount)), true);
                 playLoseSound(player);
                 updatePlayerStats(player, false, (double) -betAmount);
                 break;
@@ -587,8 +692,10 @@ public class BlackjackTable {
                 plugin.getEconomyProvider().add(player.getUniqueId(), java.math.BigDecimal.valueOf(betAmount));
                 broadcastTableMessage(configManager.formatMessage("player-push", 
                     "player", player.getName(), 
-                    "amount", String.valueOf(betAmount)));
-                player.playSound(player.getLocation(), configManager.getPushSound(), 1.0F, 1.0F);
+                    "amount", String.valueOf(betAmount)), true);
+                if (configManager.areSoundsEnabled()) {
+                    player.playSound(player.getLocation(), configManager.getPushSound(), 1.0F, 1.0F);
+                }
                 updatePlayerStats(player, null, 0.0); // Push doesn't count as win or loss
                 break;
         }
@@ -598,12 +705,10 @@ public class BlackjackTable {
     }
     
     private void updatePlayerStats(Player player, Boolean won, double winnings) {
-        com.vortex.blackjack.model.PlayerStats stats = plugin.getPlayerStats().get(player.getUniqueId());
-        if (stats == null) {
-            stats = new com.vortex.blackjack.model.PlayerStats();
-            plugin.getPlayerStats().put(player.getUniqueId(), stats);
-        }
-        
+        // Load the saved record first; starting from a blank one would overwrite the player's history
+        com.vortex.blackjack.model.PlayerStats stats = plugin.getOrLoadStats(player.getUniqueId());
+        plugin.markStatsDirty();
+
         if (won == null) {
             // Push - use the increment method
             stats.incrementPushes();
@@ -633,7 +738,7 @@ public class BlackjackTable {
     // Helper methods
     private int getNextAvailableSeatNumber() {
         Set<Integer> takenSeats = new HashSet<>(playerSeats.values());
-        for (int i = 0; i < configManager.getMaxPlayers(); i++) {
+        for (int i = 0; i < settings.getMaxPlayers(configManager); i++) {
             if (!takenSeats.contains(i)) {
                 return i;
             }
@@ -655,6 +760,136 @@ public class BlackjackTable {
                 return null;
         }
     }
+
+    /** Seat number of the chair at (dx, dz) blocks from the table centre, or -1. */
+    static int seatAtOffset(int dx, int dz) {
+        if (dz == 0 && dx == 2) return 0;
+        if (dx == 0 && dz == 2) return 1;
+        if (dz == 0 && dx == -2) return 2;
+        if (dx == 0 && dz == -2) return 3;
+        return -1;
+    }
+
+    /** Yaw that faces the table from a seat (0 = south, 90 = west, 180 = north, 270 = east). */
+    private static float seatYaw(int seatNumber) {
+        return switch (seatNumber) {
+            case 0 -> 90f;   // east chair looks west
+            case 1 -> 180f;  // south chair looks north
+            case 2 -> 270f;  // west chair looks east
+            default -> 0f;   // north chair looks south
+        };
+    }
+
+    private boolean isSeatFree(int seatNumber) {
+        return seatNumber >= 0 && seatNumber < settings.getMaxPlayers(configManager)
+            && !playerSeats.containsValue(seatNumber);
+    }
+
+    /**
+     * Sit the player on their chair by mounting them on an invisible marker armor stand. The stand is
+     * placed so the player's hips rest on the stair's top surface (half a block above the chair block).
+     */
+    private void sitDown(Player player, int seatNumber) {
+        Location chair = getSeatLocation(seatNumber);
+        if (chair == null || chair.getWorld() == null) {
+            return;
+        }
+        double hipsY = chair.getBlockY() + 0.5;
+        Location standLoc = new Location(chair.getWorld(), chair.getBlockX() + 0.5,
+            hipsY - ServerCompat.RIDER_HIP_HEIGHT + ServerCompat.STAND_ABOVE_RIDER_FEET, chair.getBlockZ() + 0.5,
+            seatYaw(seatNumber), 0f);
+
+        ArmorStand stand = chair.getWorld().spawn(standLoc, ArmorStand.class);
+        stand.setMarker(true);
+        stand.setVisible(false);
+        stand.setGravity(false);
+        stand.setInvulnerable(true);
+        stand.setSilent(true);
+        stand.setBasePlate(false);
+        stand.setPersistent(false);   // like the cards, never saved with the chunk
+        stand.addScoreboardTag(SEAT_TAG);
+        stand.addScoreboardTag(getTableDisplayTag());
+        stand.addPassenger(player);
+        seatEntities.put(player, stand);
+    }
+
+    /** Take the player off their seat (if they have one) and remove it. */
+    private void standUp(Player player) {
+        ArmorStand stand = seatEntities.remove(player);
+        if (stand != null) {
+            stand.eject();
+            stand.remove();
+        }
+    }
+
+    /**
+     * Put a player who got off their seat back on it. While they still hold sneak the server takes
+     * them straight off again, so keep re-seating every tick until they've stayed on for half a
+     * second (or five seconds pass, or they leave the table).
+     */
+    public void reseat(Player player) {
+        new BukkitRunnable() {
+            private int ticks;
+            private int mountedTicks;
+
+            @Override
+            public void run() {
+                ArmorStand stand = seatEntities.get(player);
+                if (stand == null || !stand.isValid() || !player.isOnline() || ++ticks > 100) {
+                    cancel();
+                    return;
+                }
+                if (stand.getPassengers().contains(player)) {
+                    if (++mountedTicks >= 10) {
+                        cancel();
+                    }
+                    return;
+                }
+                mountedTicks = 0;
+                stand.addPassenger(player);
+            }
+        }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    /**
+     * What leaving right now would do to the player's bet, so sneaking out can ask first when a
+     * round is in progress. Mirrors the rules in {@link #removePlayer(Player, String)}.
+     */
+    public LeaveOutcome leaveOutcome(Player player) {
+        Integer bet = plugin.getPlayerBets().get(player);
+        boolean inRound = roundBets.containsKey(player);
+        if (bet == null || bet <= 0 || !gameInProgress || !inRound) {
+            return LeaveOutcome.NOTHING_AT_STAKE; // no round, or a pending bet that gets refunded
+        }
+        boolean handStillLive = !finishedPlayers.contains(player) && !isPlayerBusted(player);
+        return handStillLive && configManager.shouldRefundOnLeave() ? LeaveOutcome.REFUND : LeaveOutcome.FORFEIT;
+    }
+
+    public enum LeaveOutcome { NOTHING_AT_STAKE, REFUND, FORFEIT }
+
+    /**
+     * Sneak-to-leave: returns true if the player should leave now. Mid-round the first sneak only
+     * warns (and puts them back on the seat); a second sneak within three seconds confirms.
+     */
+    public boolean confirmSneakLeave(Player player) {
+        LeaveOutcome outcome = leaveOutcome(player);
+        if (outcome == LeaveOutcome.NOTHING_AT_STAKE) {
+            return true;
+        }
+        long now = System.currentTimeMillis();
+        Long first = pendingLeaves.get(player.getUniqueId());
+        if (first != null && now - first <= 3000) {
+            pendingLeaves.remove(player.getUniqueId());
+            return true;
+        }
+        pendingLeaves.put(player.getUniqueId(), now);
+        Integer bet = plugin.getPlayerBets().get(player);
+        player.sendMessage(configManager.formatMessage(
+            outcome == LeaveOutcome.REFUND ? "seat-leave-confirm-refund" : "seat-leave-confirm-forfeit",
+            "amount", bet == null ? 0 : bet));
+        reseat(player); // sneaking takes them off the seat; put them back
+        return false;
+    }
     
     private Transformation createCardTransformation(boolean isDealer, int seatNumber) {
         if (isDealer) {
@@ -673,20 +908,14 @@ public class BlackjackTable {
             );
         } else {
             float xRotation = (float) (Math.PI / 2);
-            float zRotation = 0.0f;
-            switch (seatNumber) {
-                case 0:
-                    zRotation = (float) (Math.PI / 2);
-                    break;
-                case 1:
-                    zRotation = (float) Math.PI;
-                    break;
-                case 2:
-                    zRotation = (float) (Math.PI / 2);
-                    break;
-                case 3:
-                    zRotation = (float) Math.PI;
-            }
+            // Lying flat, the card's top edge points along (-sin z, 0, cos z). Point it from the
+            // chair towards the dealer so the player reads the card the right way up.
+            float zRotation = switch (seatNumber) {
+                case 0 -> (float) (Math.PI / 2);   // east chair: top towards the west
+                case 1 -> (float) Math.PI;         // south chair: top towards the north
+                case 2 -> (float) (-Math.PI / 2);  // west chair: top towards the east
+                default -> 0.0f;                   // north chair: top towards the south
+            };
 
             return new Transformation(
                 new Vector3f(0.0f, 0.0f, 0.0f),
@@ -702,22 +931,23 @@ public class BlackjackTable {
         Location displayLoc = new Location(world, loc.getBlockX() + 0.5, loc.getBlockY(), loc.getBlockZ() + 0.5, 0.0f, 0.0f);
         ItemDisplay display = (ItemDisplay)world.spawn(displayLoc, ItemDisplay.class);
         
-        if (card != null) {
-            String cardIdentifier = card.getCardIdentifier();
-            ItemStack cardItem = new ItemStack(Material.CLOCK);
-            ItemMeta meta = cardItem.getItemMeta();
-            meta.setItemModel(new NamespacedKey("playing_cards", "card/" + cardIdentifier.toLowerCase()));
-            cardItem.setItemMeta(meta);
-            display.setItemStack(cardItem);
+        String model = card != null ? card.getCardIdentifier().toLowerCase() : "back";
+        ItemStack cardItem = new ItemStack(Material.CLOCK);
+        ItemMeta meta = cardItem.getItemMeta();
+        if (ServerCompat.ITEM_MODELS) {
+            meta.setItemModel(new NamespacedKey("playing_cards", "card/" + model));
         } else {
-            ItemStack cardBack = new ItemStack(Material.CLOCK);
-            ItemMeta meta = cardBack.getItemMeta();
-            meta.setItemModel(new NamespacedKey("playing_cards", "card/back"));
-            cardBack.setItemMeta(meta);
-            display.setItemStack(cardBack);
+            // Before 1.21.2 there's no item_model component; Playing Cards 1.2+ maps these
+            // CustomModelData values on the clock to the same card models
+            meta.setCustomModelData(CardModels.legacyCustomModelData(model));
         }
+        cardItem.setItemMeta(meta);
+        display.setItemStack(cardItem);
 
-        display.addScoreboardTag("blackjack-card");
+        // Never saved with the chunk: if the chunk unloads or the server dies mid-game, the card
+        // disappears instead of being left on the table forever (issue #8).
+        display.setPersistent(false);
+        display.addScoreboardTag(CardDisplayCleaner.CARD_TAG);
         display.addScoreboardTag(getTableDisplayTag());
         Transformation transform = createCardTransformation(isDealer, seatNumber);
         display.setTransformation(transform);
@@ -744,22 +974,17 @@ public class BlackjackTable {
         return suit + rank;
     }
     
-    private void sendPlayerMessage(Player player, String message) {
+    private void sendPlayerMessage(Player player, String message, boolean important) {
         // Always use compact mode - no config needed
         UUID playerId = player.getUniqueId();
         long currentTime = System.currentTimeMillis();
         Long lastTime = lastMessageTime.get(playerId);
         
-        // Bypass cooldown for critical messages (payouts, results, dealer final hand, doubledown)
-        boolean isCriticalMessage = message.contains("WINS!") || message.contains("BLACKJACK!") || 
-                                  message.contains("loses") || message.contains("PUSH") ||
-                                  message.contains("DOUBLES DOWN") ||
-                                  message.startsWith("Dealer: ") && message.contains("|");
-        
-        // Only send if it's been more than 1.5 seconds since last message, OR if it's a critical message
-        if (isCriticalMessage || lastTime == null || currentTime - lastTime > 1500) {
+        // Important messages (payouts, results, dealer final hand, double down) skip the cooldown.
+        // Callers flag them explicitly: matching on the English text broke every translation.
+        if (important || lastTime == null || currentTime - lastTime > 1500) {
             // Check if message is already formatted (contains color codes or special characters)
-            if (message.contains("§") || message.contains("&") || isCriticalMessage) {
+            if (message.contains("§") || message.contains("&") || important) {
                 // Send directly - already formatted
                 player.sendMessage(message);
             } else {
@@ -771,11 +996,15 @@ public class BlackjackTable {
     }
     
     private void broadcastTableMessage(String message) {
+        broadcastTableMessage(message, false);
+    }
+    
+    private void broadcastTableMessage(String message, boolean important) {
         // Send to all players at the table with spam reduction
         for (Map.Entry<Player, Integer> entry : playerSeats.entrySet()) {
             Player player = entry.getKey();
             if (player != null && player.isOnline()) {
-                sendPlayerMessage(player, message);
+                sendPlayerMessage(player, message, important);
             }
         }
     }
@@ -815,7 +1044,8 @@ public class BlackjackTable {
             valueColor = ChatColor.YELLOW;        // Normal = Yellow
         }
         
-        return "" + ChatColor.BOLD + valueColor + "Value: " + value + ChatColor.RESET;
+        return "" + ChatColor.BOLD + valueColor
+            + configManager.formatMessage("hand-value-format", "value", value) + ChatColor.RESET;
     }
     
     public void broadcastToTable(String message) {
@@ -834,7 +1064,7 @@ public class BlackjackTable {
             player.playSound(player.getLocation(), configManager.getWinSound(), 1.0F, 1.0F);
         }
         
-        if (configManager.areParticlesEnabled()) {
+        if (configManager.areParticlesEnabled() && configManager.getWinParticle() != null) {
             player.spawnParticle(configManager.getWinParticle(), 
                 player.getLocation().add(0.0, 2.0, 0.0), 20, 0.5, 0.5, 0.5);
         }
@@ -845,7 +1075,7 @@ public class BlackjackTable {
             player.playSound(player.getLocation(), configManager.getLoseSound(), 1.0F, 1.0F);
         }
         
-        if (configManager.areParticlesEnabled()) {
+        if (configManager.areParticlesEnabled() && configManager.getLoseParticle() != null) {
             player.spawnParticle(configManager.getLoseParticle(), 
                 player.getLocation().add(0.0, 2.0, 0.0), 10, 0.5, 0.5, 0.5);
         }
@@ -868,7 +1098,7 @@ public class BlackjackTable {
 
         String tableTag = getTableDisplayTag();
         for (Entity entity : centerLoc.getWorld().getNearbyEntities(centerLoc, 8.0, 4.0, 8.0, entity ->
-            entity.getScoreboardTags().contains("blackjack-card") &&
+            entity.getScoreboardTags().contains(CardDisplayCleaner.CARD_TAG) &&
             entity.getScoreboardTags().contains(tableTag))) {
             entity.remove();
         }
@@ -890,8 +1120,10 @@ public class BlackjackTable {
         double cardSpacing = configManager.getCardSpacing();
         double playerHeight = configManager.getPlayerCardHeight();
         double distanceFromPlayer = 1.0; // Original hardcoded value
+        // With 3D cards off (or unsupported below 1.21.2) the hand is only shown in chat
+        int cardsToShow = configManager.areCardDisplaysEnabled() ? hand.size() : 0;
 
-        for (int i = 0; i < hand.size(); i++) {
+        for (int i = 0; i < cardsToShow; i++) {
             Card card = hand.get(i);
             Location spawnLoc = baseDisplayLoc.clone();
             ItemDisplay display = createCardDisplay(spawnLoc, card, false, seatNumber);
@@ -960,7 +1192,8 @@ public class BlackjackTable {
                     "value", dealerVisibleCard.getValue()));
             }
 
-            for (int i = 0; i < dealerHand.size(); i++) {
+            int cardsToShow = configManager.areCardDisplaysEnabled() ? dealerHand.size() : 0;
+            for (int i = 0; i < cardsToShow; i++) {
                 Card card = dealerHand.get(i);
                 Location spawnLoc = baseDisplayLoc.clone();
                 Card displayCard = gameInProgress && i > 0 ? null : card;
@@ -1025,9 +1258,43 @@ public class BlackjackTable {
     }
     
     /**
+     * True if the entity is one of this table's cards or seats.
+     */
+    public boolean ownsEntity(Entity entity) {
+        for (ArmorStand seat : seatEntities.values()) {
+            if (seat.getUniqueId().equals(entity.getUniqueId())) return true;
+        }
+        return ownsDisplay(entity);
+    }
+
+    /**
+     * True if the entity is one of the cards this table currently has laid out.
+     */
+    public boolean ownsDisplay(Entity entity) {
+        UUID id = entity.getUniqueId();
+        for (List<ItemDisplay> displays : playerCardDisplays.values()) {
+            for (ItemDisplay display : displays) {
+                if (display.getUniqueId().equals(id)) return true;
+            }
+        }
+        for (List<ItemDisplay> displays : playerDealerDisplays.values()) {
+            for (ItemDisplay display : displays) {
+                if (display.getUniqueId().equals(id)) return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Cleanup all resources for this table
      */
     public void cleanup() {
+        cancelTurnTimer();
+        cancelAutoLeaveTimer();
+        for (Player seated : new ArrayList<>(seatEntities.keySet())) {
+            standUp(seated);
+        }
+        pendingLeaves.clear();
         purgeTrackedDisplays();
         clearAllDisplays();
         players.clear();
@@ -1050,8 +1317,8 @@ public class BlackjackTable {
     
     // PlaceholderAPI support methods
     public int getPlayerCount() { return players.size(); }
-    public int getAvailableSeats() { return configManager.getMaxPlayers() - players.size(); }
-    public boolean isFull() { return players.size() >= configManager.getMaxPlayers(); }
+    public int getAvailableSeats() { return Math.max(0, settings.getMaxPlayers(configManager) - players.size()); }
+    public boolean isFull() { return players.size() >= settings.getMaxPlayers(configManager); }
     public Location getLocation() { return centerLoc; }
     
     public boolean hasPlayerHand(Player player) { return playerHands.containsKey(player); }
@@ -1157,7 +1424,7 @@ public class BlackjackTable {
             if (player.isOnline()) {
                 player.sendMessage(configManager.getMessage("auto-left-inactive"));
             }
-            removePlayer(player, "was removed due to inactivity");
+            removePlayer(player, configManager.getMessage("leave-reason-inactive"));
             gameEndTimes.remove(player);
         }
         
